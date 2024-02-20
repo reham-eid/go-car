@@ -1,4 +1,5 @@
-import {Cart} from "../../../DB/models/cart.model.js";
+import { Cart } from "../../../DB/models/cart.model.js";
+import Coupon from "../../../DB/models/coupon.model.js";
 import Product from "../../../DB/models/product.model.js";
 import { asyncHandler } from "../../middlewares/asyncHandler.js";
 
@@ -24,6 +25,7 @@ const addCart = asyncHandler(async (req, res, next) => {
     );
   // put product.price in res
   req.body.price = product.price;
+
   // one cart per user
   const isCart = await Cart.findOne({ user: req.user._id });
   // check if cart exisit or not
@@ -33,28 +35,31 @@ const addCart = asyncHandler(async (req, res, next) => {
     const cart = new Cart({
       user: req.user._id,
       cartItems: [req.body],
+      discount: req.body.discount,
     });
     //calc total price
     await pricCalc(cart);
-    if(!cart) return res.status(404).json({ message: "cart Not found" });
+    if (!cart) return res.status(404).json({ message: "cart Not found" });
     res.status(201).json({ message: "added to cart successfully ", cart });
   } else {
     //if exisit { push product}{if product>> its quantity >> check quantity in db}
     // find if body.product === cartItems.product (same product)
     let item = isCart.cartItems.find((i) => i.productId == req.body.productId); // shallow copy
     //then add one product in quantity
+    console.log(item);
     if (item) {
       //check quantity in db مع كل مره بيزود
       if (item.quantity >= product.quantity)
         return next(new Error("product sold out"));
       item.quantity += req.body.quantity || 1;
     }
+
     // else push new product to cart
     else isCart.cartItems.push(req.body);
+
     // calc total price
     await pricCalc(isCart);
     // save in db
-
     // send res
     res
       .status(201)
@@ -62,6 +67,26 @@ const addCart = asyncHandler(async (req, res, next) => {
   }
 });
 
+const applyCoupon = asyncHandler(async (req, res, next) => {
+  // check coupon in couponModel
+  const coupon = await Coupon.findOne({
+    code: req.body.coupon,
+    expires: { $gt: Date.now() },
+  });
+  if (!coupon) return next(new Error("Invalid Coupon", { cause: 404 }));
+  // check cart
+  const cart = await Cart.findOne({ user: req.user._id });
+  // calc totalPriceAfterDiscount
+  const totalPrice = cart.totalPrice;
+  const totalPriceAfterDiscount = (
+    totalPrice -
+    (totalPrice * coupon.discount) / 100
+  ).toFixed(2);
+  cart.totalPriceAfterDiscount = totalPriceAfterDiscount
+  await cart.save()
+  //send res
+  res.status(201).json({message:"apply Coupon siccessfully" , cart})
+});
 const removeItemFromCart = asyncHandler(async (req, res, next) => {
   // check productId if exisit or not
   const product = await Product.findById(req.params.id);
@@ -158,6 +183,7 @@ const clearUserCart = asyncHandler(async (req, res) => {
 });
 export {
   addCart,
+  applyCoupon,
   removeItemFromCart,
   updateQuantity,
   getAllCart,

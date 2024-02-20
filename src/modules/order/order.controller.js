@@ -1,5 +1,5 @@
 import { asyncHandler } from "../../middlewares/asyncHandler.js";
-import {Cart} from "../../../DB/models/cart.model.js";
+import { Cart } from "../../../DB/models/cart.model.js";
 import Order from "../../../DB/models/order.model.js";
 import Product from "../../../DB/models/product.model.js";
 import Stripe from "stripe";
@@ -8,20 +8,25 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const createCashOrder = asyncHandler(async (req, res, next) => {
   // get cart from user and check
-  const cart = await Cart.findById(req.params.id);
+  const cart = await Cart.findById(req.params.cartId);
   if (!cart) return next(new Error("cart not found", { cause: 404 }));
+  if (cart.user.toString() != req.user._id.toString())
+    return next(new Error("not your cart  ", { cause: 403 }));
   // total order price
   let totalOrderPrice = cart.totalPriceAfterDiscount
     ? cart.totalPriceAfterDiscount
     : cart.totalPrice;
   //create order
+
   const order = new Order({
     user: req.user._id,
     cart: cart.cartItems,
     totalOrderPrice,
     shippingAddress: req.body.address,
   });
+
   await order.save();
+
   //increment sold & decrement quantity in products
   let operation = cart.cartItems.map((product) => {
     return {
@@ -33,9 +38,10 @@ const createCashOrder = asyncHandler(async (req, res, next) => {
       },
     };
   });
+
   const product = await Product.bulkWrite(operation);
   // clear cart
-  await Cart.findByIdAndDelete({ user: req.user._id });
+  await Cart.findOneAndDelete({ user: req.user._id });
   // send res
   res.status(201).json({ message: "order send", order });
 });
@@ -55,26 +61,25 @@ const allOrders = asyncHandler(async (req, res, next) => {
 
 const createCheckoutSession = asyncHandler(async (req, res, next) => {
   // get cart from user and check
-  const cart = await Cart.findOne({ user: req.user._id });
+  const cart = await Cart.findById(req.params.id);
+  console.log(req.user._id);
+  console.log(req.user.username);
+
   if (!cart) return next(new Error("cart not found", { cause: 404 }));
-  // check Order
-  const order = await Order.findById(req.params.id);
-  if (!order) return next(new Error("order not found", { cause: 404 }));
 
   // total order price
-  order.totalOrderPrice = cart.totalPriceAfterDiscount
+  let totalOrderPrice = cart.totalPriceAfterDiscount
     ? cart.totalPriceAfterDiscount
     : cart.totalPrice;
-  await order.save();
   // create session
   const session = await stripe.checkout.sessions.create({
     line_items: [
       {
         price_data: {
           currency: "egp",
-          unit_amount: order.totalOrderPrice * 100,
+          unit_amount: totalOrderPrice * 100,
           product_data: {
-            user: req.user.username,
+            name: req.user.username,
           },
         },
         quantity: 1, // already calc totalPrice
@@ -82,14 +87,13 @@ const createCheckoutSession = asyncHandler(async (req, res, next) => {
     ],
     payment_method_types: ["card"],
     mode: "payment",
-    success_url: "",
-    cancel_url: "",
+    success_url: "https://e-commerce-ccoj.onrender.com",
+    cancel_url: "https://e-commerce-ccoj.onrender.com/api/v1/carts",
     customer_email: req.user.email,
-    client_reference_id: req.user._id,
-    metadata: {
-      shippingAddress: req.body.address,
-      order_id: order._id.toString(),
-    },
+    client_reference_id: req.params.id, //cartId
+    metadata: 
+      req.body.address,
+
   });
   //send res
   res.status(201).json({ message: "success", session });
@@ -110,14 +114,11 @@ const createOnlineOrder = async (request, response) => {
   // Handle the event
   if (event.type == "checkout.session.completed") {
     const checkoutSessionCompleted = event.data.object;
-    //change status order
-    const orderId = checkoutSessionCompleted.metadata.order_id;
-    await Order.findByIdAndUpdate(orderId, { status: "visa payed" });
-    card(event.data.object, response);
+
+    await card(event.data.object, response);
     return;
   } else {
-    const orderId = checkoutSessionCompleted.metadata.order_id;
-    await Order.findByIdAndUpdate(orderId, { status: "failed to payed" });
+
     console.log(`Unhandled event type ${event.type}`);
     return;
   }
@@ -153,9 +154,9 @@ async function card(e, res) {
         },
       };
     });
-    const product = await Product.bulkWrite(operation);
+    await Product.bulkWrite(operation);
     // clear cart
-    await Cart.findByIdAndDelete({ user: user._id });
+    await Cart.findByOneDelete({ user: user._id });
     // send res
     return res.status(201).json({ message: "order send", order });
   }

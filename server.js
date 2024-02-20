@@ -7,10 +7,10 @@ import morgan from "morgan";
 
 config({ path: "./config/dev.config.env" });
 
-const app = express();
-//الترتيب؟؟؟؟؟؟
 // DB Connection
 await connectDB();
+
+const app = express();
 
 app.use(cors());
 app.use((req, res, next) => {

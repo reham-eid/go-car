@@ -2,7 +2,7 @@ import Joi from "joi";
 import generalField from "../../utils/generalFields.js";
 
 const addOrderVal = Joi.object({
-  id:generalField.id.required(),
+  cartId:generalField.id.required(),
 
   address:generalField.address.required(),
   payment:generalField.name.valid("cash", "visa")

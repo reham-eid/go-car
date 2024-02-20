@@ -6,6 +6,12 @@ import * as JoiVal from "./cart.validation.js";
 
 const CartRouter = Router();
 
+CartRouter.put("/apply-coupon",
+    protectedRoute,
+    allowTo("user"),
+    validation(JoiVal.applyCouponVal),
+    CartController.applyCoupon
+  )
 CartRouter.route("/")
   .post(
     protectedRoute,
@@ -29,12 +35,6 @@ CartRouter.route("/:id")
     allowTo("user", "admin"),
     validation(JoiVal.paramsIdVal),
     CartController.removeItemFromCart
-  )
-  .put(
-    protectedRoute,
-    allowTo("user"),
-    validation(JoiVal.updateQuantity),
-    CartController.updateQuantity
   );
 
 export default CartRouter;

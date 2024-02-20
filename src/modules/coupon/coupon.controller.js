@@ -1,5 +1,4 @@
 import { asyncHandler } from "../../middlewares/asyncHandler.js";
-import { deleteOne } from "../handler/handler.js";
 import { ApiFeature } from "../../utils/ApiFeature.js";
 import Coupon from "../../../DB/models/coupon.model.js";
 import randomstring from "randomstring";
@@ -33,8 +32,8 @@ const allCoupons = asyncHandler(async (req, res, next) => {
 
 const OneCoupon = asyncHandler(async (req, res) => {
   const coupon = await Coupon.findById(req.params.id);
-  !coupon && res.status(404).json({ message: "Coupon Not found" });
-  coupon && res.status(200).json({ message: "Coupon of this Id:", coupon });
+  if(!coupon) return res.status(404).json({ message: "Coupon Not found" });
+   res.status(200).json({ message: "Coupon of this Id:", coupon });
 });
 
 const updateCoupon = asyncHandler(async (req, res,next) => {
@@ -44,7 +43,7 @@ const updateCoupon = asyncHandler(async (req, res,next) => {
     createdBy: req.user._id,
     expires: { $gt: Date.now() },
   });
-  !coupon && res.status(404).json({ message: "Invalid Coupon" });
+  if(!coupon) return res.status(404).json({ message: "Invalid Coupon" });
   // check owner
   if (coupon.createdBy.toString() !== req.user._id.toString())
     return next(new Error("you are not authorized", { cause: 401 }));
@@ -55,7 +54,7 @@ const updateCoupon = asyncHandler(async (req, res,next) => {
     : coupon.expires;
 
   await coupon.save();
-  coupon && res.status(200).json({ message: "Coupon updated", coupon });
+   res.status(200).json({ message: "Coupon updated", coupon });
 });
 
 const deleteCoupon = asyncHandler(async (req, res,next) => {
@@ -65,14 +64,14 @@ const deleteCoupon = asyncHandler(async (req, res,next) => {
       createdBy: req.user._id,
       expires: { $gt: Date.now() },
     });
-    !coupon && res.status(404).json({ message: "Coupon Not found" });
+    if(!coupon) return res.status(404).json({ message: "Coupon Not found" });
     // check owner
     if (req.user._id.toString() !== coupon.createdBy.toString())
       return next(new Error("you are not authorized", { cause: 401 }));
   // delete 
   await coupon.deleteOne();
 
-  coupon && res.status(200).json({ message: "Coupon deleted", coupon }); 
+   res.status(200).json({ message: "Coupon deleted", coupon }); 
 })
 
 export { addCoupon, allCoupons, deleteCoupon, updateCoupon, OneCoupon };

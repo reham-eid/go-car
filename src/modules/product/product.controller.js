@@ -53,7 +53,6 @@ const addProduct = asyncHandler(async (req, res, next) => {
     images: imgs,
     imgCover: { id: public_id, url: secure_url },
   });
-  // req.body.slug = slugify(req.body.title);
 
   res.status(201).json({ message: "Product added successfuly", product });
 });

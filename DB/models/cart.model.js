@@ -22,32 +22,11 @@ const CartSchema = new Schema(
     ],
     totalPrice: Number,
     totalPriceAfterDiscount: Number,
-    coupon: {
-      id: { type: Types.ObjectId, ref: "coupon" },
-      name: { type: String },
-      discount: {
-        type: Number,
-        required: true,
-        min: 1,
-        max: 80,
-      },
-    },
-    // discount: { // ref Coupn
-    //   type: Number,
-    //   required: true,
-    //   min: 1,
-    //   max: 80,
-    // },
   },
-  { timestamps: true, strictQuery: true }
+  {
+    timestamps: true,
+    strictQuery: true,
+  }
 );
 
-CartSchema.virtual("finalPrice").get(function () {
-  return this.coupon
-    ? Number.parseInt(
-        this.totalPriceAfterDiscount -
-          (this.totalPriceAfterDiscount * this.coupon.discount) / 100
-      )
-    : this.totalPriceAfterDiscount;
-});
-export const Cart= model("cart", CartSchema);
+export const Cart = model("cart", CartSchema);

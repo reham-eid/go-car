@@ -13,17 +13,18 @@ orderRouter.post(
 ); //stripe
 
 orderRouter
-  .route("/:id")
+  .route("/:cartId")
   .post(
     protectedRoute,
     allowTo("user"),
-    validation(JoiVal.paramsIdVal),
+    validation(JoiVal.addOrderVal),
     OrderController.createCashOrder
   );
 orderRouter.post(
   "/checkout/:id",
   protectedRoute,
   allowTo("user"),
+  validation(JoiVal.paramsIdVal),
   OrderController.createCheckoutSession
 );
 orderRouter.get(
@@ -35,6 +36,5 @@ orderRouter.get(
 orderRouter
   .route("/")
   .get(protectedRoute, allowTo("user"), OrderController.OneOrder);
-
 
 export default orderRouter;
