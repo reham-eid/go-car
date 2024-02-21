@@ -1,4 +1,4 @@
-import fs  from "fs";
+import fs from "fs";
 import PDFDocument from "pdfkit";
 
 function createInvoice(invoice, path) {
@@ -18,11 +18,11 @@ function generateHeader(doc) {
     // .image("logo.png", 50, 45, { width: 50 })
     .fillColor("#444444")
     .fontSize(20)
-    .text("ACME Inc.", 110, 57)
+    .text("Company.", 110, 57)
     .fontSize(10)
-    .text("ACME Inc.", 200, 50, { align: "right" })
-    .text("123 Main Street", 200, 65, { align: "right" })
-    .text("New York, NY, 10025", 200, 80, { align: "right" })
+    .text("AZAZ.", 200, 50, { align: "right" })
+    .text("9 Street", 200, 65, { align: "right" })
+    .text("Egypt, EG ", 200, 80, { align: "right" })
     .moveDown();
 }
 
@@ -31,19 +31,19 @@ function generateCustomerInformation(doc, invoice) {
 
   generateHr(doc, 185);
 
-  const customerInformationTop = 200;
+  const customerInformationTop = 200; //position
 
   doc
     .fontSize(10)
-    .text("Invoice Number:", 50, customerInformationTop)
+    .text("Order ID:", 50, customerInformationTop)
     .font("Helvetica-Bold")
     .text(invoice.invoice_nr, 150, customerInformationTop)
     .font("Helvetica")
-    .text("Invoice Date:", 50, customerInformationTop + 15)
+    .text("Date:", 50, customerInformationTop + 15)
     .text(formatDate(new Date()), 150, customerInformationTop + 15)
     .text("Balance Due:", 50, customerInformationTop + 30)
     .text(
-      formatCurrency(invoice.subtotal - invoice.paid),
+      formatCurrency(invoice.paid), // olready calc total price
       150,
       customerInformationTop + 30
     )
@@ -52,15 +52,7 @@ function generateCustomerInformation(doc, invoice) {
     .text(invoice.shipping.name, 300, customerInformationTop)
     .font("Helvetica")
     .text(invoice.shipping.address, 300, customerInformationTop + 15)
-    .text(
-      invoice.shipping.city +
-        ", " +
-        invoice.shipping.state +
-        ", " +
-        invoice.shipping.country,
-      300,
-      customerInformationTop + 30
-    )
+    .text(invoice.shipping.country, 300, customerInformationTop + 30)
     .moveDown();
 
   generateHr(doc, 252);
@@ -89,11 +81,11 @@ function generateInvoiceTable(doc, invoice) {
     generateTableRow(
       doc,
       position,
-      item.item,
+      item.title,
       item.description,
-      formatCurrency(item.amount / item.quantity),
+      formatCurrency(item.totalOrderPrice / item.quantity),
       item.quantity,
-      formatCurrency(item.amount)
+      formatCurrency(item.totalOrderPrice)
     );
 
     generateHr(doc, position + 20);
@@ -130,7 +122,7 @@ function generateInvoiceTable(doc, invoice) {
     "",
     "Balance Due",
     "",
-    formatCurrency(invoice.subtotal - invoice.paid)
+    formatCurrency(invoice.subtotal - invoice.paid) // نسبه الخصم
   );
   doc.font("Helvetica");
 }
@@ -169,7 +161,7 @@ function generateHr(doc, y) {
 }
 
 function formatCurrency(cents) {
-  return "$" + (cents / 100).toFixed(2);
+  return "EGP" + cents;
 }
 
 function formatDate(date) {

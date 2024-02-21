@@ -40,7 +40,7 @@ const protectedRoute = asyncHandler(async (req, res, next) => {
   // check User by token.userId
   const user = await User.findById(payload.userId);
   // if not exisit res
-  !user && next(new Error("there is no user for this token", { cause: 401 }));
+  if(!user) return next(new Error("there is no user for this token", { cause: 401 }));
   if (user?.changePassAt) {
     // if exisit compare between time Date.now() of User.changePassAt
     // vs token.iat

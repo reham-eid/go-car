@@ -4,6 +4,8 @@ import Order from "../../../DB/models/order.model.js";
 import Product from "../../../DB/models/product.model.js";
 import Stripe from "stripe";
 import User from "../../../DB/models/user.model.js";
+import createInvoice from "../../utils/pdfInvoice.js";
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const createCashOrder = asyncHandler(async (req, res, next) => {
@@ -40,6 +42,29 @@ const createCashOrder = asyncHandler(async (req, res, next) => {
   });
 
   const product = await Product.bulkWrite(operation);
+  //create invoice
+
+  const invoice = {
+    shipping: {
+      name: req.user.name,
+      address: req.body.address,
+      country: "Cairo",
+    },
+    items: order.cart.map(
+      ({ productId: { title, description }, quantity, totalOrderPrice }) => ({
+        item: title,
+        description: description,
+        quantity: quantity,
+        amount: totalOrderPrice * 100,
+      })
+    ),
+
+    subtotal: cart.totalPrice, //before discount
+    paid: order.totalOrderPrice, //after discount
+    invoice_nr: order._id,
+  };
+
+  createInvoice(invoice, "invoice.pdf");
   // clear cart
   await Cart.findOneAndDelete({ user: req.user._id });
   // send res
@@ -62,8 +87,6 @@ const allOrders = asyncHandler(async (req, res, next) => {
 const createCheckoutSession = asyncHandler(async (req, res, next) => {
   // get cart from user and check
   const cart = await Cart.findById(req.params.id);
-  console.log(req.user._id);
-  console.log(req.user.username);
 
   if (!cart) return next(new Error("cart not found", { cause: 404 }));
 
@@ -91,9 +114,7 @@ const createCheckoutSession = asyncHandler(async (req, res, next) => {
     cancel_url: "https://e-commerce-ccoj.onrender.com/api/v1/carts",
     customer_email: req.user.email,
     client_reference_id: req.params.id, //cartId
-    metadata: 
-      req.body.address,
-
+    metadata: req.body.address,
   });
   //send res
   res.status(201).json({ message: "success", session });
@@ -118,7 +139,6 @@ const createOnlineOrder = async (request, response) => {
     await card(event.data.object, response);
     return;
   } else {
-
     console.log(`Unhandled event type ${event.type}`);
     return;
   }
