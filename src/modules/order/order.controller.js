@@ -27,7 +27,9 @@ const createCashOrder = asyncHandler(async (req, res, next) => {
     shippingAddress: req.body.address,
   });
 
-  await order.save();
+  await (await order.save()).populate({
+    path:"cart.productId"
+  });
 
   //increment sold & decrement quantity in products
   let operation = cart.cartItems.map((product) => {
@@ -51,11 +53,11 @@ const createCashOrder = asyncHandler(async (req, res, next) => {
       country: "Cairo",
     },
     items: order.cart.map(
-      ({ productId: { title, description }, quantity, totalOrderPrice }) => ({
+      ({ productId: { title, description }, quantity }) => ({
         item: title,
         description: description,
         quantity: quantity,
-        amount: totalOrderPrice * 100,
+        amount: totalOrderPrice,
       })
     ),
 

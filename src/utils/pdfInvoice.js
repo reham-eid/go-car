@@ -78,14 +78,15 @@ function generateInvoiceTable(doc, invoice) {
   for (i = 0; i < invoice.items.length; i++) {
     const item = invoice.items[i];
     const position = invoiceTableTop + (i + 1) * 30;
+    console.log(item.title)
     generateTableRow(
       doc,
       position,
-      item.title,
+      item.item,
       item.description,
-      formatCurrency(item.totalOrderPrice / item.quantity),
+      formatCurrency(item.amount / item.quantity),
       item.quantity,
-      formatCurrency(item.totalOrderPrice)
+      formatCurrency(item.amount)
     );
 
     generateHr(doc, position + 20);

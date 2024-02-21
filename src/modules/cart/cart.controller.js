@@ -9,13 +9,14 @@ const pricCalc = async (model) => {
     totalPrice += item.quantity * item.price;
   });
   model.totalPrice = totalPrice;
+
   await model.save();
 };
 
 const addCart = asyncHandler(async (req, res, next) => {
   // check productId if exisit or not
   const product = await Product.findById(req.body.productId);
-  !product && next(new Error("product not found", { cause: 404 }));
+  if (!product) return next(new Error("product not found", { cause: 404 }));
   // check productQuantity
   if (!product.inStock(req.body.quantity))
     return next(
@@ -46,7 +47,7 @@ const addCart = asyncHandler(async (req, res, next) => {
     // find if body.product === cartItems.product (same product)
     let item = isCart.cartItems.find((i) => i.productId == req.body.productId); // shallow copy
     //then add one product in quantity
-    console.log(item);
+
     if (item) {
       //check quantity in db مع كل مره بيزود
       if (item.quantity >= product.quantity)
@@ -54,7 +55,7 @@ const addCart = asyncHandler(async (req, res, next) => {
       item.quantity += req.body.quantity || 1;
     }
 
-    // else push new product to cart
+    // else push new product to cartItems
     else isCart.cartItems.push(req.body);
 
     // calc total price
@@ -82,10 +83,10 @@ const applyCoupon = asyncHandler(async (req, res, next) => {
     totalPrice -
     (totalPrice * coupon.discount) / 100
   ).toFixed(2);
-  cart.totalPriceAfterDiscount = totalPriceAfterDiscount
-  await cart.save()
+  cart.totalPriceAfterDiscount = totalPriceAfterDiscount;
+  await cart.save();
   //send res
-  res.status(201).json({message:"apply Coupon siccessfully" , cart})
+  res.status(201).json({ message: "apply Coupon siccessfully", cart });
 });
 const removeItemFromCart = asyncHandler(async (req, res, next) => {
   // check productId if exisit or not

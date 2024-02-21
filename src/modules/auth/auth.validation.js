@@ -2,7 +2,7 @@ import Joi from "joi";
 import generalField from "../../utils/generalFields.js";
 
 const signUpVal = Joi.object({
-  username: generalField.name.required(),
+  username:generalField.name.required(),
   email: generalField.email.required(),
   password: generalField.password.required(),
   confirmPassword: generalField.confirmPassword.required(),

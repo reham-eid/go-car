@@ -7,8 +7,8 @@ const addToWishList = asyncHandler(async (req, res) => {
     { $addToSet: { wishList: req.body.productId } },
     { new: true }
   ).populate("wishList");
-  !wishList && res.status(404).json({ message: "WishList Not found" });
-  wishList &&
+  if(!wishList) return res.status(404).json({ message: "WishList Not found" });
+  
     res.status(201)
       .json({ message: "WishList updated", wishList: wishList.wishList });
 });
@@ -18,12 +18,12 @@ const removeFromWishList = asyncHandler(async (req, res) => {
     { $pullAll: { wishList: req.params.id } }, // productId in wishList array ,
     { new: true }
   ).populate("wishList");
-  !wishList && res.status(404).json({ message: "WishList Not found" });
-  wishList && res.status(200).json({ message: "WishList updated", wishList });
+  if(!wishList) return res.status(404).json({ message: "WishList Not found" });
+   res.status(200).json({ message: "WishList updated", wishList });
 });
 const getWishList = asyncHandler(async (req, res) => {
   const { wishList } = await User.findById(req.user._id).populate("wishList");;
-  !wishList && res.status(404).json({ message: "WishList Not found" });
-  wishList && res.status(200).json({ message: "WishLists : ", wishList });
+  if(!wishList) return res.status(404).json({ message: "WishList Not found" });
+   res.status(200).json({ message: "WishLists : ", wishList });
 });
 export { addToWishList, removeFromWishList ,getWishList};

@@ -19,7 +19,6 @@ wishListRouter
 
 wishListRouter
   .route("/:id")
-  // .get(validation(JoiVal.paramsIdVal), WishListController.OneWishList)
   .delete(
     protectedRoute,
     allowTo("user", "admin"),

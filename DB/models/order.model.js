@@ -38,16 +38,6 @@ const orderSchema = new Schema(
       url: { type: String },
       id: { type: String },
     },
-    // coupon: {
-    //   id: { type: Types.ObjectId, ref: "coupon" },
-    //   name: { type: String },
-    //   discount: {
-    //     type: Number,
-    //     required: true,
-    //     min: 1,
-    //     max: 80,
-    //   },
-    // },
     status: {
       type: String,
       enum: [
