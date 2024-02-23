@@ -2,7 +2,7 @@ import Joi from "joi";
 import generalField from "../../utils/generalFields.js";
 
 const signUpVal = Joi.object({
-  username:generalField.name.required(),
+  username: generalField.name.required(),
   email: generalField.email.required(),
   password: generalField.password.required(),
   confirmPassword: generalField.confirmPassword.required(),
@@ -25,7 +25,7 @@ const forgetPassVal = Joi.object({
 
 const resetPassVal = Joi.object({
   newPassword: generalField.password.required(),
-  confirmPassword: generalField.confirmPassword.required(),
+  confirmPassword: Joi.valid(Joi.ref("newPassword")).required(),
   code: generalField.name.length(5).required(),
 }).required();
 
