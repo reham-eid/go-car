@@ -77,7 +77,7 @@ userSchema.pre("findOneAndUpdate", function () {
     {
       this._update.password = bcryptjs.hashSync(
       this._update.password,
-      process.env.SALT
+      +process.env.SALT
     );
   }
 });
