@@ -87,7 +87,6 @@ userSchema.pre("findOneAndUpdate", function () {
       this._update.password,
       process.env.SALT
     );
-    return this;
   }
 });
 
