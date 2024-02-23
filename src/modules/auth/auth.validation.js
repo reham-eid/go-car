@@ -24,7 +24,7 @@ const forgetPassVal = Joi.object({
 }).required();
 
 const resetPassVal = Joi.object({
-  password: generalField.password.required(),
+  newPassword: generalField.password.required(),
   confirmPassword: generalField.confirmPassword.required(),
   code: generalField.name.length(5).required(),
 }).required();

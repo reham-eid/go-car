@@ -135,8 +135,8 @@ const forgetPass = asyncHandler(async (req, res,next) => {
   });
   // send res
   res.status(200).json({
-    message: "You can Reset your password Now , check your Email",
-    user,
+    message: "You can Reset your password Now we have send you a code , check your Email",
+    username :user.username,
   });
 });
 

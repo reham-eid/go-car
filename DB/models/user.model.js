@@ -10,14 +10,6 @@ const userSchema = new Schema(
         type: String,
       },
     },
-    coverImages: [
-      {
-        url: { type: String },
-        id: {
-          type: String,
-        },
-      },
-    ],
     email: {
       type: String,
       lowercase: true,
