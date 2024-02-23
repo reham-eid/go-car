@@ -108,15 +108,17 @@ const logIn = asyncHandler(async (req, res, next) => {
   res.status(200).json({ message: "log in successfuly", Token: token });
 });
 
-const forgetPass = asyncHandler(async (req, res) => {
+const forgetPass = asyncHandler(async (req, res,next) => {
   // get email from req
   const { email } = req.body;
   // check email in db
   const user = await User.findOne({ email });
   if (!user) return next(new Error("user not found", { cause: 404 }));
   // check isEmailConfirm
-  if (!user.isEmailConfirm) return;
-  next(new Error("You should acctivate your account first", { cause: 404 }));
+  if (!user.isEmailConfirm)
+    return next(
+      new Error("You should acctivate your account first", { cause: 404 })
+    );
   //generate forgetCode
   const forgetCode = randomstring.generate({
     charset: "numeric",
@@ -150,7 +152,7 @@ const resetPass = asyncHandler(async (req, res, next) => {
     return next(new Error("Invalid Code", { cause: 404 }));
   // create new token
   const token = jwt.sign(
-    { userId: user._id, role: user.role },
+    { userId: user._id, role: user.role ,email:user.email},
     process.env.JWT_SECRET_KEY
   );
   // hash & update password

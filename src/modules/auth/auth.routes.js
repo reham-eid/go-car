@@ -21,7 +21,6 @@ authRouter
   .patch(
     "/reset-Password",
     authController.protectedRoute,
-    
     validation(authValidation.resetPassVal),
     authController.resetPass
   );
