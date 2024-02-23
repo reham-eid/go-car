@@ -27,20 +27,32 @@ const createCashOrder = asyncHandler(async (req, res, next) => {
     shippingAddress: req.body.address,
   });
 
-  await (await order.save()).populate({
-    path:"cart.productId"
+  await (
+    await order.save()
+  ).populate({
+    path: "cart.productId",
   });
 
   //increment sold & decrement quantity in products
+  let updateObject = { updateOne };
   let operation = cart.cartItems.map((product) => {
-    return {
-      updateOne: {
+    console.log(product.quantity);
+    if (product.quantity == 0) {
+      updateObject.updateOne = {
         filter: { _id: product.productId },
         update: {
-          $inc: { sold: product.quantity, quantity: -product.quantity },
+          $inc: { sold: product.quantity },
         },
+      };
+    }
+    updateObject.updateOne = {
+      filter: { _id: product.productId },
+      update: {
+        $inc: { sold: product.quantity, quantity: -product.quantity },
       },
     };
+
+    return updateObject;
   });
 
   const product = await Product.bulkWrite(operation);

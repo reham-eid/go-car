@@ -66,6 +66,7 @@ const activeAccount = asyncHandler(async (req, res,next) => {
   //find user by emailToken
   const { emailToken } = req.params;
   const { email } = jwt.verify(emailToken, process.env.JWT_SECRET_KEY);
+  //console.log(email);
   //update isEmailConfirm
   const user = await User.findOneAndUpdate(
     { email },

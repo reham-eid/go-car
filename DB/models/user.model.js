@@ -80,12 +80,15 @@ userSchema.pre("save", function () {
   return this;
 });
 userSchema.pre("findOneAndUpdate", function () {
+  // console.log(this._update.password);
   if (this._update.password)
-    this._update.password = bcryptjs.hashSync(
+    {
+      this._update.password = bcryptjs.hashSync(
       this._update.password,
       process.env.SALT
     );
-  return this;
+    return this;
+  }
 });
 
 const User = model("user", userSchema);
