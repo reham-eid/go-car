@@ -11,7 +11,7 @@ const signUp = asyncHandler(async (req, res, next) => {
   let { email, username, password, confirmPassword } = req.body;
   //check data
   const isExisit = await User.findOne({ email });
-  isExisit && next(new Error("User already exisit", { cause: 409 }));
+  if(isExisit) return next(new Error("User already exisit", { cause: 409 }));
   // if not exisit hash pass
   //in user.model.js
   //generate token from email
@@ -73,9 +73,8 @@ const activeAccount = asyncHandler(async (req, res,next) => {
     { isEmailConfirm: true },
     { new: true }
   );
-  !user && next(new Error("user Not found", { cause: 404 }));
+  if(!user) return next(new Error("user Not found", { cause: 404 }));
   //send res
-  user &&
     res
       .status(200)
       .json({ message: "acctivate your account successfuly", user });
