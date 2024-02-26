@@ -20,6 +20,10 @@ const CartSchema = new Schema(
         price: Number,
       },
     ],
+    discount: {
+      type: Number,
+      ref:"product"
+    },
     totalPrice: Number,
     totalPriceAfterDiscount: Number,
   },
@@ -28,5 +32,7 @@ const CartSchema = new Schema(
     strictQuery: true,
   }
 );
+//virtual ref on product
+
 
 export const Cart = model("cart", CartSchema);

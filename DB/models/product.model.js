@@ -43,7 +43,7 @@ const productSchema = new Schema(
     },
     discount: {
       type: Number,
-      min: 1,
+      min: 0,
       max: 80,
       required: true,
     },
@@ -60,11 +60,6 @@ const productSchema = new Schema(
       type: Number,
       min: 0,
       max: 5,
-    },
-    rateCount: {
-      type: Number,
-      min: 0,
-      default: 0,
     },
     createdBy: {
       type: Types.ObjectId,

@@ -4,7 +4,7 @@ const BrandSchema = new Schema(
   {
     name: {
       type: String,
-      unique: [true, "Brand Name already Exisit "],
+      // unique: [true, "Brand Name already Exisit "],
       trim: true,
       required: true,
       minLength: [2, "too short of Brand Name "],
@@ -22,6 +22,10 @@ const BrandSchema = new Schema(
       type: Types.ObjectId,
       ref: "user",
     },
+    subCategoryId:{
+      type:Types.ObjectId,
+      ref:"subCategory"
+    }
   },
   { timestamps: true, strictQuery: true } // filter only with this schema fields
 );

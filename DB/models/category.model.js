@@ -24,12 +24,12 @@ const categorySchema = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       ref: "user",
     },
-    brands: [
-      {
-        type: Types.ObjectId,
-        ref: "brand",
-      },
-    ],
+    // brands: [
+    //   {
+    //     type: Types.ObjectId,
+    //     ref: "brand",
+    //   },
+    // ], loading on server
   },
   { timestamps: true, 
     strictQuery: true ,
@@ -50,7 +50,7 @@ categorySchema.post(
   }
 );
 // virtual subCategory field
-categorySchema.virtual("subCategory", {
+categorySchema.virtual("subCategoryId", {
   ref: "subCategory", //Model
   localField: "_id", // category
   foreignField: "categoryId", //subCategory

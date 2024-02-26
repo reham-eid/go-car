@@ -2,9 +2,11 @@ import Joi from "joi";
 import generalField from "../../utils/generalFields.js";
 
 const addReviewVal = Joi.object({
-  text: generalField.name.min(2).max(200).required(),
+  comment: generalField.name.min(2).max(500).required(),
   rate: generalField.count.min(0).max(5).required(),
   productId: generalField.id.required(),
+  image: generalField.file.optional(),
+
 });
 
 const paramsIdVal = Joi.object({
@@ -12,9 +14,13 @@ const paramsIdVal = Joi.object({
 });
 
 const updateReviewVal = Joi.object({
-  text: generalField.name.max(200),
+  id: generalField.id.required(),
+  productId: generalField.id.required(),
+
+  comment: generalField.name.min(2).max(500),
   rate: generalField.count.min(0).max(5),
-  productId: generalField.id,
+  image: generalField.file.optional(),
+
 });
 
 export { addReviewVal, paramsIdVal, updateReviewVal };

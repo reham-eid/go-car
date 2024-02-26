@@ -1,9 +1,9 @@
 import Category from "../../../DB/models/category.model.js";
 import slugify from "slugify";
 import { asyncHandler } from "../../middlewares/asyncHandler.js";
-import { deleteOne } from "../handler/handler.js";
 import { ApiFeature } from "../../utils/ApiFeature.js";
 import cloudinary from "../../services/fileUploads/cloudinary.js";
+
 const addCategory = asyncHandler(async (req, res, next) => {
   // req.body.slug = slugify(req.body.name);
   //check file
@@ -26,24 +26,30 @@ const addCategory = asyncHandler(async (req, res, next) => {
 });
 
 const allCategories = asyncHandler(async (req, res) => {
-
   let apiFeature = new ApiFeature(Category.find({}), req.query).pagination();
 
-  const categories = await apiFeature.mongoQuery;
+  const categories = await apiFeature.mongoQuery.populate([
+    {
+      path: "subCategories",
+      select: "-image",
+      populate: [{ path: "brands", select: "-logo" }],
+    },
+  ]);
   res.status(200).json({ message: "All Categories", categories });
 });
 
-const OneCategory = asyncHandler(async (req, res) => {
+const OneCategory = asyncHandler(async (req, res, next) => {
   const category = await Category.findById(req.params.id);
-  !category && res.status(404).json({ message: "Category Not found" });
-  category &&
-    res.status(200).json({ message: "Category of this Id:", category });
+  if (!category)
+    return next(new Error("category name not found", { cause: 404 }));
+  res.status(200).json({ message: "Category of this Id:", category });
 });
 
 const updateCategory = asyncHandler(async (req, res, next) => {
   //check category in db
   const category = await Category.findById(req.params.id);
-  !category && next(new Error("category name not found", { cause: 404 }));
+  if (!category)
+    return next(new Error("category name not found", { cause: 404 }));
   // check category owner
   if (category.createdBy.toString() !== req.user._id.toString())
     return next(new Error("you are not Owner of category", { cause: 403 }));
@@ -63,15 +69,14 @@ const updateCategory = asyncHandler(async (req, res, next) => {
 
   // if (req.body.name) category.slug = slugify(req.body.name);
   await category.save();
-
-  !category && res.status(404).json({ message: "Category Not found" });
-  category && res.status(200).json({ message: "Category updated", category });
+  res.status(200).json({ message: "Category updated", category });
 });
 
 const deleteCategory = asyncHandler(async (req, res, next) => {
   // check Category
   const category = await Category.findById(req.params.id);
-  !category && res.status(404).json({ message: "category Not found" });
+  if (!category)
+    return next(new Error("category name not found", { cause: 404 }));
   // check owner
   if (req.user._id.toString() !== category.createdBy.toString())
     return next(new Error("you are not authorized to delete", { cause: 401 }));
@@ -84,7 +89,7 @@ const deleteCategory = asyncHandler(async (req, res, next) => {
 export {
   addCategory,
   allCategories,
-  deleteCategory,//1
+  deleteCategory,
   updateCategory,
   OneCategory,
 };

@@ -2,11 +2,13 @@ import { Schema, Types, model } from "mongoose";
 
 const ReviewSchema = new Schema(
   {
-    text: {
+    comment: {
       type: String,
       trim: true,
       required: true,
-      minLength: [2, "too short of Review text "],
+      minLength: [2, "too short of Review comment "],
+      maxLength: [500, "too long of Review comment "],
+
     },
     rate: {
       type: Number,
@@ -20,6 +22,14 @@ const ReviewSchema = new Schema(
     userId: {
       type: Types.ObjectId,
       ref: "user",
+    },
+    orderId: {
+      type: Types.ObjectId,
+      ref: "order",
+    },
+    image: {
+      id: { type: String, required: true },
+      url: { type: String, required: true },
     },
   },
   { timestamps: true, strictQuery: true }

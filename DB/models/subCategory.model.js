@@ -21,20 +21,31 @@ const subCategorySchema = new Schema(
     categoryId: {
       type: Types.ObjectId,
       ref: "category",
+      required: [true, "subCategory must be belong to its Category"],
     },
     image: {
       id: { type: String },
       url: { type: String },
     },
-    brands: [
-      {
-        type: Types.ObjectId,
-        ref: "brand",
-      },
-    ],
+    // brands: [
+    //   {
+    //     type: Types.ObjectId,
+    //     ref: "brand",
+    //   },
+    // ], loading on server
   },
-  { timestamps: true, strictQuery: true }
+  {
+    timestamps: true,
+    strictQuery: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 );
-
+// virtual field called brands
+subCategorySchema.virtual("brands", {
+  ref: "brand",
+  localField: "_id",
+  foreignField: "subCategoryId",
+});
 const SubCategory = model("subCategory", subCategorySchema);
 export default SubCategory;

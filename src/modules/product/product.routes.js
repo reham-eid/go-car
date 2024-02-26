@@ -4,8 +4,12 @@ import * as ProductController from "./product.controller.js";
 import * as JoiVal from "./product.validation.js";
 import { uploadFiles } from "../../services/fileUploads/multer.js";
 import { allowTo, protectedRoute } from "../auth/auth.controller.js";
+import reviewRouter from "../review/review.routes.js";
 
 const productRouter = Router();
+
+//Merge param
+productRouter.use("/:productId/reviews",reviewRouter);
 
 productRouter
   .route("/")
@@ -26,6 +30,8 @@ productRouter
   .route("/:id")
   .get(validation(JoiVal.paramsIdVal), ProductController.OneProduct)
   .put(
+    protectedRoute,
+    allowTo("admin"),
     uploadFiles([
       { name: "imgCover", maxCount: 1 },
       { name: "images", maxCount: 10 },

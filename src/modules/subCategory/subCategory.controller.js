@@ -8,7 +8,7 @@ import Category from "../../../DB/models/category.model.js";
 const addSubCategory = asyncHandler(async (req, res, next) => {
   // check on category in params (merg param)
   const category = await Category.findById(req.params.category);
-  !category && next(new Error("category not found", { cause: 404 }));
+  if (!category) return next(new Error("category not found", { cause: 404 }));
 
   // check image
   if (!req.file)
@@ -19,7 +19,10 @@ const addSubCategory = asyncHandler(async (req, res, next) => {
   );
   // check if exisit or not by name
   const isExisit = await SubCategory.findOne({ name: req.body.name });
-  isExisit && next(new Error("SubCategory already exisit", { cause: 409 }));
+
+  if (!isExisit)
+    return next(new Error("SubCategory already exisit", { cause: 409 }));
+
   // create SubCategory
   const subCategory = await SubCategory.create({
     name: req.body.name,
@@ -46,32 +49,32 @@ const allSubCategories = asyncHandler(async (req, res) => {
     .filter()
     .sort()
     .fields()
-    .search(); 
-    // console.log(Object.keys(filterObj));
-  let subCategories = await apiFeature.mongoQuery
-  .populate("categoryId") //  Object.keys(filterObj)[0]
-  
+    .search();
+  // console.log(Object.keys(filterObj));
+  let subCategories = await apiFeature.mongoQuery.populate("categoryId"); //  Object.keys(filterObj)[0]
+
   res.status(200).json({ message: "All SubCategory", subCategories });
 }); // api feature with merge param
 
-const OneSubCategory = asyncHandler(async (req, res) => {
+const OneSubCategory = asyncHandler(async (req, res, next) => {
   const subCategory = await SubCategory.findById(req.params.id);
-  !subCategory && res.status(404).json({ message: "SubCategory Not found" });
-  subCategory &&
-    res.status(200).json({ message: "SubCategory of this Id:", SubCategory });
+  if (!subCategory)
+    return next(new Error("subCategory Not found", { cause: 404 }));
+  res.status(200).json({ message: "SubCategory of this Id:", SubCategory });
 });
 
 const updateSubCategory = asyncHandler(async (req, res, next) => {
   // check category (we are in merge param)
   const category = await Category.findById(req.params.category);
-  !category && next(new Error("category not found", { cause: 404 }));
+  if (!category) return next(new Error("category not found", { cause: 404 }));
 
   // check subcategory
   const subCategory = await SubCategory.findOne({
     _id: req.params.id,
     categoryId: req.params.category,
   });
-  !subCategory && res.status(404).json({ message: "subCategory Not found" });
+  if (!subCategory)
+    return next(new Error("subCategory Not found", { cause: 404 }));
   // check owner
   if (req.user._id.toString() !== subCategory.createdBy.toString())
     return next(new Error("you are not the owner", { cause: 403 }));
@@ -96,14 +99,16 @@ const updateSubCategory = asyncHandler(async (req, res, next) => {
 const deleteSubCategory = asyncHandler(async (req, res, next) => {
   // check category (we are in merge param)
   const category = await Category.findById(req.params.category);
-  !category && next(new Error("category not found", { cause: 404 }));
+  if (!category) return next(new Error("category not found", { cause: 404 }));
 
   // check subcategory
   const subCategory = await SubCategory.findOne({
     _id: req.params.id,
     categoryId: req.params.category,
   });
-  !subCategory && res.status(404).json({ message: "subCategory Not found" });
+  if (!subCategory)
+    return next(new Error("subCategory Not found", { cause: 404 }));
+
   // delete subcategory
   await subCategory.deleteOne();
   // destroy img
@@ -113,8 +118,8 @@ const deleteSubCategory = asyncHandler(async (req, res, next) => {
 
 export {
   addSubCategory,
-  allSubCategories, //1
+  allSubCategories, 
   OneSubCategory,
-  deleteSubCategory, //2
+  deleteSubCategory, 
   updateSubCategory,
 };

@@ -25,17 +25,21 @@ export const validation = (schema) => {
       };
     }
     const validationResult = schema.validate(filter, { abortEarly: false });
+    // console.log(validationResult);
     if (!validationResult?.error) return next();
     else {
       let errorList = [];
       validationResult.error.details.map((ele) => {
         errorList.push(ele);
       });
+
       return res.status(400).json({ message: "Errors is: ", errorList });
     }
   };
 };
 
 export const validateObjectId = (value, helper) => {
-  Types.ObjectId.isValid(value) ? true : helper.message("Invalid Object ID");
+  return Types.ObjectId.isValid(value)
+    ? true
+    : helper.message("Invalid Object ID");
 };

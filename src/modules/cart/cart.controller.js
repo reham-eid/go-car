@@ -7,6 +7,7 @@ const pricCalc = async (model) => {
   let totalPrice = 0;
   model.cartItems.forEach((item) => {
     totalPrice += item.quantity * item.price;
+     totalPrice - ( totalPrice * item.discount || 0) / 100
   });
   model.totalPrice = totalPrice;
 
@@ -40,6 +41,9 @@ const addCart = asyncHandler(async (req, res, next) => {
     });
     //calc total price
     await pricCalc(cart);
+    if (product.discount) {
+      
+    }
     if (!cart) return res.status(404).json({ message: "cart Not found" });
     res.status(201).json({ message: "added to cart successfully ", cart });
   } else {

@@ -6,11 +6,14 @@ import cors from "cors";
 import morgan from "morgan";
 
 config({ path: "./config/dev.config.env" });
+const app = express();
 
 // DB Connection
 await connectDB();
-
-const app = express();
+//morgan
+if (process.env.NODE_ENV == "development") {
+  app.use(morgan("dev"));
+}
 
 app.use(cors());
 app.use((req, res, next) => {
@@ -20,10 +23,6 @@ app.use((req, res, next) => {
   express.json()(req, res, next);
 });
 app.use(express.urlencoded({ extended: true }));
-
-if (process.env.NODE_ENV == "development") {
-  app.use(morgan("dev"));
-}
 
 // API routes
 init(app);
