@@ -21,14 +21,14 @@ const allUsers = asyncHandler(async (req, res) => {
 
   const users = await apiFeature.mongoQuery.populate([
     { path: "wishList", select: "title" },
-  ]);
+  ]).lean();
   res.status(200).json({ message: "All user", users });
 });
 
 const Oneuser = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id);
-  !user && res.status(404).json({ message: "user Not found" }); // !!
-  user && res.status(200).json({ message: "user of this Id:", user });
+  const user = await User.findById(req.params.id).lean();
+  if(!user) return res.status(404).json({ message: "user Not found" }); 
+  res.status(200).json({ message: "user of this Id:", user });
 });
 
 const updateuser = asyncHandler(async (req, res, next) => {

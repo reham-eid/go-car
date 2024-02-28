@@ -51,20 +51,19 @@ const allSubCategories = asyncHandler(async (req, res) => {
     //{categoryId:req.params.category}
   }
   let apiFeature = new ApiFeature(SubCategory.find(filterObj), req.query)
-
     .pagination()
     .filter()
     .sort()
     .fields()
     .search();
   // console.log(Object.keys(filterObj));
-  let subCategories = await apiFeature.mongoQuery.populate("categoryId"); //  Object.keys(filterObj)[0]
+  let subCategories = await apiFeature.mongoQuery.populate("categoryId").lean(); //  Object.keys(filterObj)[0]
 
   res.status(200).json({ message: "All SubCategory", subCategories });
 }); // api feature with merge param
 
 const OneSubCategory = asyncHandler(async (req, res, next) => {
-  const subCategory = await SubCategory.findById(req.params.id);
+  const subCategory = await SubCategory.findById(req.params.id).lean();
   if (!subCategory)
     return next(new Error("subCategory Not found", { cause: 404 }));
   res.status(200).json({ message: "SubCategory of this Id:", SubCategory });

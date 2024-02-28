@@ -1,13 +1,13 @@
 export class ApiFeature {
-  constructor(mongoQuery, data) {
+  constructor(mongoQuery, query) {
     this.mongoQuery = mongoQuery;
-    this.data = data;
+    this.query = query;
   }
 
-  pagination() {
-    if (this.data?.page <= 0) this.data.page = 1;
-    let PAGE_NUMBER = this.data?.page * 1 || 1; // if string(NAN || 1)
-    let PAGE_LIMIT = 2;
+  pagination({ size = 3 }) {
+    if (this.query?.page <= 0) this.query.page = 1;
+    let PAGE_NUMBER = this.query?.page * 1 || 1; // if string(NAN || 1)
+    let PAGE_LIMIT = size;
     let SKIP = (PAGE_NUMBER - 1) * PAGE_LIMIT;
 
     this.mongoQuery = this.mongoQuery.skip(SKIP).limit(PAGE_LIMIT);
@@ -16,7 +16,7 @@ export class ApiFeature {
   }
 
   filter() {
-    let filterObj = { ...this.data };
+    let filterObj = { ...this.query };
     // let execludedQuery = ["page", "sort", "fields", "filter"];
     // execludedQuery.forEach((q) => {
     //   delete filterObj[q];
@@ -29,30 +29,29 @@ export class ApiFeature {
   }
 
   sort() {
-    if (this.data?.sort) {
-      let sortBy = this.data.sort.split(",").join(" "); // sort by more than one feild
+    if (this.query?.sort) {
+      let sortBy = this.query.sort.split(",").join(" "); // sort by more than one feild
       this.mongoQuery.sort(sortBy);
     }
     return this;
-  } 
+  }
 
   fields() {
-    if (this.data?.fields) {
-      let selected = this.data.fields.split(",").join(" ");
+    if (this.query?.fields) {
+      let selected = this.query.fields.split(",").join(" ");
       this.mongoQuery.select(selected);
     }
     return this;
   }
 
   search() {
-    if (this.data?.keyword) {
+    if (this.query?.keyword) {
       // search : tv >>(lgtv , toshipatv) // any thing that include keyword(tv)
       this.mongoQuery.find({
         $or: [
-          { title: { $regex: this.data.keyword, $options: "i" } },
-          { description: { $regex: this.data.keyword, $options: "i" } },
-          { name: { $regex: this.data.keyword, $options: "i" } },
-
+          { title: { $regex: this.query.keyword, $options: "i" } },
+          { description: { $regex: this.query.keyword, $options: "i" } },
+          { name: { $regex: this.query.keyword, $options: "i" } },
         ],
       });
     }

@@ -71,12 +71,12 @@ const allReviews = asyncHandler(async (req, res) => {
     .sort()
     .pagination()
     .filter();
-  const reviews = await apiFeature.mongoQuery;
+  const reviews = await apiFeature.mongoQuery.lean();
   res.status(200).json({ message: "All Reviews", reviews });
 });
 
 const OneReview = asyncHandler(async (req, res, next) => {
-  const Review = await Review.findById(req.params.id);
+  const Review = await Review.findById(req.params.id).lean();
   if (!Review) return next(new Error("Review Not found", { cause: 404 }));
   res.status(200).json({ message: "Review of this Id:", Review });
 });

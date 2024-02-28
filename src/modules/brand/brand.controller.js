@@ -65,15 +65,15 @@ const getAllBrand = asyncHandler(async (req, res) => {
   let apiFeature = new ApiFeature(Brand.find({}), req.query)
     .fields()
     .sort()
-    .pagination()
+    .pagination({size:2})
     .filter()
     .search();
-  const brand = await apiFeature.mongoQuery;
+  const brand = await apiFeature.mongoQuery.lean();
   res.status(200).json({ message: "All Brand", brand });
 });
 
 const OneBrand = asyncHandler(async (req, res) => {
-  const brand = await Brand.findById(req.params.id);
+  const brand = await Brand.findById(req.params.id).lean();
   if (!brand) return res.status(404).json({ message: "brand Not found" });
   res.status(200).json({ message: "brand of this Id:", brand });
 });

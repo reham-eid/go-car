@@ -84,15 +84,15 @@ const getAllProduct = asyncHandler(async (req, res) => {
   let apiFeature = new ApiFeature(Product.find(), req.query)
     .fields()
     .sort()
-    .pagination()
+    .pagination({size:1})
     .filter()
     .search();
-  const product = await apiFeature.mongoQuery;
+  const product = await apiFeature.mongoQuery.lean();
   res.status(200).json({ message: "All Product", product });
 });
 
 const OneProduct = asyncHandler(async (req, res) => {
-  const product = await Product.findById(req.params.id);
+  const product = await Product.findById(req.params.id).lean();
   if (!product) return res.status(404).json({ message: "product Not found" });
   res.status(200).json({ message: "product of this Id:", product });
 });

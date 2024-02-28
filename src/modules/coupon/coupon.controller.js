@@ -21,18 +21,18 @@ const addCoupon = asyncHandler(async (req, res, next) => {
   res.status(201).json({ message: "Coupon added successfuly", coupon });
 });
 
-const allCoupons = asyncHandler(async (req, res, next) => {
+const allCoupons = asyncHandler(async (req, res ) => {
   let apiFeature = new ApiFeature(Coupon.find({}), req.query)
     .fields()
     .sort()
     .pagination()
     .filter()
-  const coupons = await apiFeature.mongoQuery;
+  const coupons = await apiFeature.mongoQuery.lean();
   res.status(201).json({ message: "All Coupons", coupons });
 });
 
 const OneCoupon = asyncHandler(async (req, res) => {
-  const coupon = await Coupon.findById(req.params.id);
+  const coupon = await Coupon.findById(req.params.id).lean();
   if(!coupon) return res.status(404).json({ message: "Coupon Not found" });
    res.status(200).json({ message: "Coupon of this Id:", coupon });
 });

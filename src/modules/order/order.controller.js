@@ -88,11 +88,11 @@ const createCashOrder = asyncHandler(async (req, res, next) => {
 });
 
 const OneOrder = asyncHandler(async (req, res, next) => {
-  const order = await Order.findOne({ user: req.user._id }).populate(
-    "cart.productId"
-  );
-  !order && next(new Error("no result", { cause: 404 }));
-  order && res.status(200).json({ message: "your Order ", order });
+  const order = await Order.findOne({ user: req.user._id })
+    .populate("cart.productId")
+    .lean();
+  if (!order) return next(new Error("no result", { cause: 404 }));
+  res.status(200).json({ message: "your Order ", order });
 });
 
 const allOrders = asyncHandler(async (req, res, next) => {
@@ -101,7 +101,7 @@ const allOrders = asyncHandler(async (req, res, next) => {
     .sort()
     .pagination()
     .filter();
-  const orders = await apiFeature.mongoQuery.populate("cart.productId");
+  const orders = await apiFeature.mongoQuery.populate("cart.productId").lean();
   res.status(200).json({ message: "your Order ", orders });
 });
 

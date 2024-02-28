@@ -47,12 +47,12 @@ const allCategories = asyncHandler(async (req, res) => {
       select: "-image",
       populate: [{ path: "brands", select: "-logo" }],
     },
-  ]);
+  ]).lean();
   res.status(200).json({ message: "All Categories", categories });
 });
 
 const OneCategory = asyncHandler(async (req, res, next) => {
-  const category = await Category.findById(req.params.id);
+  const category = await Category.findById(req.params.id).lean();
   if (!category)
     return next(new Error("category name not found", { cause: 404 }));
   res.status(200).json({ message: "Category of this Id:", category });
