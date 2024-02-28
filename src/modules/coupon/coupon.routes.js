@@ -1,8 +1,8 @@
 import { Router } from "express";
 import * as CouponController from "./coupon.controller.js";
 import { validation } from "../../middlewares/validation.middleware.js";
-import { allowTo, protectedRoute } from "../auth/auth.controller.js";
 import * as JoiVal from "./coupon.validation.js";
+import { allowTo, protectedRoute } from "../../middlewares/auth.js";
 
 const couponRouter = Router();
 
@@ -17,7 +17,7 @@ couponRouter
   .get(validation(JoiVal.paramsIdVal), CouponController.OneCoupon)
   .put(
     validation(JoiVal.updateCouponVal),
-    CouponController.updateCoupon // BIG PROPLEM
+    CouponController.updateCoupon 
   )
   .delete(
     validation(JoiVal.updateCouponVal),

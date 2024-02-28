@@ -7,7 +7,7 @@ export class ApiFeature {
   pagination() {
     if (this.data?.page <= 0) this.data.page = 1;
     let PAGE_NUMBER = this.data?.page * 1 || 1; // if string(NAN || 1)
-    let PAGE_LIMIT = 3;
+    let PAGE_LIMIT = 2;
     let SKIP = (PAGE_NUMBER - 1) * PAGE_LIMIT;
 
     this.mongoQuery = this.mongoQuery.skip(SKIP).limit(PAGE_LIMIT);
@@ -51,6 +51,8 @@ export class ApiFeature {
         $or: [
           { title: { $regex: this.data.keyword, $options: "i" } },
           { description: { $regex: this.data.keyword, $options: "i" } },
+          { name: { $regex: this.data.keyword, $options: "i" } },
+
         ],
       });
     }

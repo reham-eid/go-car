@@ -3,7 +3,7 @@ import { validation } from "../../middlewares/validation.middleware.js";
 import { uploadSingleFile } from "../../services/fileUploads/multer.js";
 import  * as BrandController from "./brand.controller.js";
 import * as JoiVal from "./brand.validation.js";
-import { allowTo, protectedRoute } from "../auth/auth.controller.js";
+import { allowTo, protectedRoute } from "../../middlewares/auth.js";
 
 const brandRouter = Router();
 

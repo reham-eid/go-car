@@ -2,8 +2,8 @@ import { Router } from "express";
 import * as OrderController from "./order.controller.js";
 import { validation } from "../../middlewares/validation.middleware.js";
 import * as JoiVal from "./order.validation.js";
-import { allowTo, protectedRoute } from "../auth/auth.controller.js";
 import express from "express";
+import { allowTo, protectedRoute } from "../../middlewares/auth.js";
 const orderRouter = Router();
 
 orderRouter.post(

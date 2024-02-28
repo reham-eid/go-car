@@ -2,6 +2,7 @@ import { Router } from "express";
 import { validation } from "../../middlewares/validation.middleware.js";
 import * as authValidation from "./auth.validation.js";
 import * as authController from "./auth.controller.js";
+import { protectedRoute } from "../../middlewares/auth.js";
 
 const authRouter = Router();
 
@@ -20,7 +21,7 @@ authRouter
   )
   .patch(
     "/reset-Password",
-    authController.protectedRoute,
+    protectedRoute,
     validation(authValidation.resetPassVal),
     authController.resetPass
   );

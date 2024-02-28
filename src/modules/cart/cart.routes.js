@@ -1,8 +1,8 @@
 import { Router } from "express";
 import * as CartController from "./cart.controller.js";
 import { validation } from "../../middlewares/validation.middleware.js";
-import { allowTo, protectedRoute } from "../auth/auth.controller.js";
 import * as JoiVal from "./cart.validation.js";
+import { allowTo, protectedRoute } from "../../middlewares/auth.js";
 
 const CartRouter = Router();
 

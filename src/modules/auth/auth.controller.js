@@ -18,6 +18,7 @@ const signUp = asyncHandler(async (req, res, next) => {
   const emailToken = jwt.sign({ email }, process.env.JWT_SECRET_KEY);
   // create user
   const user = await User.create({ ...req.body });
+  req.savedDocument = { model: User, condition: user._id };
   // create confirmatiom link
   const link = `${process.env.BASE_URL}/api/v1/auth/acctivate_account/${emailToken}`;
   // send confirmation link
@@ -32,40 +33,6 @@ const signUp = asyncHandler(async (req, res, next) => {
     user: user.username,
   });
 });
-
-const protectedRoute = asyncHandler(async (req, res, next) => {
-  // get Token
-  const { token } = req.headers;
-  //token exisit 401
-  // verify token
-  const payload = jwt.verify(token, process.env.JWT_SECRET_KEY);
-  // check User by token.userId
-  const user = await User.findOne({
-    $or: [{ _id: payload.userId }, { email: payload.email }],
-  });
-  // if not exisit res
-  if (!user)
-    return next(new Error("there is no user for this token", { cause: 401 }));
-  if (user?.changePassAt) {
-    // if exisit compare between time Date.now() of User.changePassAt
-    // vs token.iat
-    const time = parseInt(user?.changePassAt.getTime() / 1000);
-    // time > token it means token older (invalid)
-    if (time > payload.iat) {
-      next(new Error("token expaired... login again ", { cause: 400 }));
-    }
-  }
-  req.user = user;
-  next();
-});
-const allowTo = (...roles) => {
-  return asyncHandler(async (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
-      return next(new Error("you are not authorized", { cause: 401 }));
-    }
-    next();
-  });
-};
 
 const activeAccount = asyncHandler(async (req, res, next) => {
   //find user by emailToken
@@ -108,7 +75,7 @@ const logIn = asyncHandler(async (req, res, next) => {
   res.status(200).json({ message: "log in successfuly", Token: token });
 });
 
-const forgetPass = asyncHandler(async (req, res,next) => {
+const forgetPass = asyncHandler(async (req, res, next) => {
   // get email from req
   const { email } = req.body;
   // check email in db
@@ -135,8 +102,9 @@ const forgetPass = asyncHandler(async (req, res,next) => {
   });
   // send res
   res.status(200).json({
-    message: "You can Reset your password Now we have send you a code , check your Email",
-    username :user.username,
+    message:
+      "You can Reset your password Now we have send you a code , check your Email",
+    username: user.username,
   });
 });
 
@@ -152,7 +120,7 @@ const resetPass = asyncHandler(async (req, res, next) => {
     return next(new Error("Invalid Code", { cause: 404 }));
   // create new token
   const token = jwt.sign(
-    { userId: user._id, role: user.role ,email:user.email},
+    { userId: user._id, role: user.role, email: user.email },
     process.env.JWT_SECRET_KEY
   );
   // hash & update password
@@ -173,7 +141,5 @@ export {
   activeAccount,
   logIn,
   forgetPass,
-  protectedRoute,
-  allowTo,
   resetPass,
 };

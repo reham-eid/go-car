@@ -4,7 +4,7 @@ import { validation } from "../../middlewares/validation.middleware.js";
 import * as JoiVal from "./category.validation.js";
 import { uploadSingleFile } from "../../services/fileUploads/multer.js";
 import SubCategoryRouter from "../subCategory/subCategory.routes.js";
-import { allowTo, protectedRoute } from "../auth/auth.controller.js";
+import { allowTo, protectedRoute } from "../../middlewares/auth.js";
 
 const categoryRouter = Router();
 //Merge param

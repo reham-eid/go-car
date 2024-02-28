@@ -41,6 +41,8 @@ const addCart = asyncHandler(async (req, res, next) => {
     });
     //calc total price
     await pricCalc(cart);
+    req.savedDocument = { model: Cart, condition: cart._id };
+
     if (product.discount) {
       
     }
@@ -64,6 +66,7 @@ const addCart = asyncHandler(async (req, res, next) => {
 
     // calc total price
     await pricCalc(isCart);
+
     // save in db
     // send res
     res

@@ -5,8 +5,8 @@ import {
   uploadFiles,
   uploadSingleFile,
 } from "../../services/fileUploads/multer.js";
-import { allowTo, protectedRoute } from "../auth/auth.controller.js";
 import * as JoiVal from "./review.validation.js";
+import { allowTo, protectedRoute } from "../../middlewares/auth.js";
 
 const reviewRouter = Router({ mergeParams: true });
 

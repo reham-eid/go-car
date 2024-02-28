@@ -45,9 +45,12 @@ const addReview = asyncHandler(async (req, res, next) => {
       req.file.path,
       { folder: `${process.env.CLOUD_FOLDER_NAME}/review/${review.userId}` }
     );
+    req.folder = `${process.env.CLOUD_FOLDER_NAME}/review/${review.userId}`;
     review.image = { id: public_id, url: secure_url };
   }
   await review.save();
+  req.savedDocument = { model: Review, condition: review._id };
+
   //calculate avrage rate in Product model
   const calcAvg = 0;
   const product = await Product.findById(productId);
@@ -67,8 +70,7 @@ const allReviews = asyncHandler(async (req, res) => {
     .fields()
     .sort()
     .pagination()
-    .filter()
-    .search();
+    .filter();
   const reviews = await apiFeature.mongoQuery;
   res.status(200).json({ message: "All Reviews", reviews });
 });

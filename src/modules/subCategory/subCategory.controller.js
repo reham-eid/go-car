@@ -4,24 +4,29 @@ import SubCategory from "../../../DB/models/subCategory.model.js";
 import { ApiFeature } from "../../utils/ApiFeature.js";
 import cloudinary from "../../services/fileUploads/cloudinary.js";
 import Category from "../../../DB/models/category.model.js";
+import generateUniqueString from "../../utils/generateUniqueString.js";
 
 const addSubCategory = asyncHandler(async (req, res, next) => {
   // check on category in params (merg param)
   const category = await Category.findById(req.params.category);
   if (!category) return next(new Error("category not found", { cause: 404 }));
+  // check if exisit or not by name
+  const isExisit = await SubCategory.findOne({ name: req.body.name });
+  if (isExisit)
+    return next(new Error("SubCategory already exisit", { cause: 409 }));
 
   // check image
   if (!req.file)
     return next(new Error("SubCategory image is required", { cause: 400 }));
+
+  const uniqueId = generateUniqueString(5);
   const { public_id, secure_url } = await cloudinary.uploader.upload(
     req.file.path,
-    { folder: `${process.env.CLOUD_FOLDER_NAME}/subcategory` }
+    {
+      folder: `${process.env.CLOUD_FOLDER_NAME}/categories/${category.folderId}/subcategories/${uniqueId}`,
+    }
   );
-  // check if exisit or not by name
-  const isExisit = await SubCategory.findOne({ name: req.body.name });
-
-  if (!isExisit)
-    return next(new Error("SubCategory already exisit", { cause: 409 }));
+  req.folder = `${process.env.CLOUD_FOLDER_NAME}/categories/${category.folderId}/subcategories/${uniqueId}`;
 
   // create SubCategory
   const subCategory = await SubCategory.create({
@@ -29,8 +34,10 @@ const addSubCategory = asyncHandler(async (req, res, next) => {
     slug: slugify(req.body.name),
     createdBy: req.user._id,
     categoryId: req.params.category,
+    folderId: uniqueId,
     image: { id: public_id, url: secure_url },
   });
+  req.savedDocument = { model: SubCategory, condition: subCategory._id };
 
   res
     .status(201)
@@ -118,8 +125,8 @@ const deleteSubCategory = asyncHandler(async (req, res, next) => {
 
 export {
   addSubCategory,
-  allSubCategories, 
+  allSubCategories,
   OneSubCategory,
-  deleteSubCategory, 
+  deleteSubCategory,
   updateSubCategory,
 };

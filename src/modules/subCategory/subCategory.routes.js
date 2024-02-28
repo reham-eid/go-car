@@ -2,8 +2,8 @@ import { Router } from "express";
 import * as SubCategoryController from "./subCategory.controller.js";
 import { validation } from "../../middlewares/validation.middleware.js";
 import * as JoiVal from "./subCategory.validation.js";
-import { allowTo, protectedRoute } from "../auth/auth.controller.js";
 import { uploadSingleFile } from "../../services/fileUploads/multer.js";
+import { allowTo, protectedRoute } from "../../middlewares/auth.js";
 
 const SubCategoryRouter = Router({mergeParams:true});
 

@@ -4,7 +4,8 @@ import Order from "../../../DB/models/order.model.js";
 import Product from "../../../DB/models/product.model.js";
 import Stripe from "stripe";
 import User from "../../../DB/models/user.model.js";
-import createInvoice from "../../utils/pdfInvoice.js";
+import createInvoice from "../../services/trmpInvoices/pdfInvoice.js";
+import { ApiFeature } from "../../utils/ApiFeature.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -32,6 +33,7 @@ const createCashOrder = asyncHandler(async (req, res, next) => {
   ).populate({
     path: "cart.productId",
   });
+  req.savedDocument = { model: Order, condition: order._id };
 
   //increment sold & decrement quantity in products
   let updateObject = { updateOne };
@@ -94,7 +96,12 @@ const OneOrder = asyncHandler(async (req, res, next) => {
 });
 
 const allOrders = asyncHandler(async (req, res, next) => {
-  const orders = await Order.find({}).populate("cart.productId");
+  let apiFeature = new ApiFeature(Order.find({}), req.query)
+    .fields()
+    .sort()
+    .pagination()
+    .filter();
+  const orders = await apiFeature.mongoQuery.populate("cart.productId");
   res.status(200).json({ message: "your Order ", orders });
 });
 
@@ -175,6 +182,7 @@ async function card(e, res) {
     paidAt: Date.now(),
   });
   await order.save();
+  req.savedDocument = { model: Order, condition: order._id };
 
   if (order) {
     //increment sold & decrement quantity in products

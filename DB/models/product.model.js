@@ -8,6 +8,7 @@ const productSchema = new Schema(
       unique: [true, "Product title already Exisit "],
       trim: true,
       required: true,
+      maxLength: 50,
       minLength: [2, "too short of Product title "],
     },
     slug: {
@@ -22,12 +23,12 @@ const productSchema = new Schema(
       minLength: [10, "too short of Product description "],
     },
     imgCover: {
-      id: { type: String, required: true },
+      id: { type: String, unique: true, required: true },
       url: { type: String, required: true },
     },
     images: [
       {
-        id: { type: String, required: true },
+        id: { type: String, unique: true, required: true },
         url: { type: String, required: true },
       },
     ],
@@ -36,46 +37,58 @@ const productSchema = new Schema(
       unique: true,
       required: true,
     },
+    specefication: { //color size
+      type: Map,
+      of: [String | Number],
+    },
     price: {
       type: Number,
-      min: 0,
       required: true,
     },
     discount: {
       type: Number,
-      min: 0,
-      max: 80,
+      default: 0,
+      required: true,
+    },
+    priceAfterDiscount: {
+      type: Number,
       required: true,
     },
     quantity: {
       type: Number,
-      min: 1,
-      default: 1,
+      min: 0,
+      default: 0,
+      required: true,
     },
     sold: {
       type: Number,
       default: 0,
     },
-    rateAvg: {
+    rate: {
       type: Number,
+      default: 0,
       min: 0,
       max: 5,
     },
     createdBy: {
       type: Types.ObjectId,
       ref: "user",
+      required: true,
     },
     categoryId: {
       type: Types.ObjectId,
       ref: "category",
+      required: true,
     },
     subcategoryId: {
       type: Types.ObjectId,
       ref: "subcategory",
+      required: true,
     },
     brandId: {
       type: Types.ObjectId,
       ref: "brand",
+      required: true,
     },
   },
   {
@@ -86,13 +99,19 @@ const productSchema = new Schema(
   }
 );
 
+// productSchema.post("save", function () {
+//   if (this.isModified(("discount")))
+//     this.priceAfterDiscount =  Number.parseInt(
+//       this.price - (this.price * this.discount ) / 100
+//     )
+//   return this;
+// });
+
 // check productQuantity
 productSchema.methods.inStock = function (quantity) {
   return this.quantity >= quantity ? true : false;
 };
-productSchema.virtual("finalPrice").get(function () {
-  return Number.parseInt(this.price - (this.price * this.discount || 0) / 100);
-});
+
 productSchema.virtual("reviews", {
   ref: "review",
   foreignField: "productId",

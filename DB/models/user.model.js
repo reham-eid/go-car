@@ -67,7 +67,7 @@ const userSchema = new Schema(
   { timestamps: true, strictQuery: true }
 );
 userSchema.pre("save", function () {
-  if (this.isModified("password"))
+  if (this.isModified(("password")))
     this.password = bcryptjs.hashSync(this.password, +process.env.SALT);
   return this;
 });

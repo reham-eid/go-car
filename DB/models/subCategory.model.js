@@ -27,6 +27,11 @@ const subCategorySchema = new Schema(
       id: { type: String },
       url: { type: String },
     },
+    folderId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     // brands: [
     //   {
     //     type: Types.ObjectId,

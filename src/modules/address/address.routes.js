@@ -1,8 +1,8 @@
 import { Router } from "express";
 import * as addressController from "./address.controller.js";
 import { validation } from "../../middlewares/validation.middleware.js";
-import { allowTo, protectedRoute } from "../auth/auth.controller.js";
 import * as JoiVal from "./address.validation.js";
+import { allowTo, protectedRoute } from "../../middlewares/auth.js";
 
 const addressRouter = Router();
 

@@ -2,7 +2,7 @@ import { Router } from "express";
 import { validation } from "../../middlewares/validation.middleware.js";
 import * as userValidation from "./user.validation.js";
 import * as userController from "./user.controller.js";
-import { allowTo, protectedRoute } from "../auth/auth.controller.js";
+import { allowTo, protectedRoute } from "../../middlewares/auth.js";
 
 const userRouter = Router();
 

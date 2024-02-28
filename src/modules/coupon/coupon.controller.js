@@ -16,6 +16,8 @@ const addCoupon = asyncHandler(async (req, res, next) => {
     discount: req.body.discount,
     expires: new Date(req.body.expires).getTime(),
   });
+  req.savedDocument = { model: Coupon, condition: coupon._id };
+
   res.status(201).json({ message: "Coupon added successfuly", coupon });
 });
 
@@ -25,7 +27,6 @@ const allCoupons = asyncHandler(async (req, res, next) => {
     .sort()
     .pagination()
     .filter()
-    .search();
   const coupons = await apiFeature.mongoQuery;
   res.status(201).json({ message: "All Coupons", coupons });
 });

@@ -15,6 +15,7 @@ import { globalError } from "./middlewares/globalError.js";
 import { createHandler } from "graphql-http/lib/use/express";
 import ducumentQL from "graphql-playground-middleware-express";
 import { schema } from "./modules/graphQL.js";
+import { rollbackSavedDoc, rollbackUploadFile } from "./middlewares/rollback.js";
 const expressPlayground = ducumentQL.default;
 
 export const init = (app) => {
@@ -26,19 +27,21 @@ export const init = (app) => {
   app.use("/api/v1/brands", brandRouter);
   app.use("/api/v1/products", productRouter);
   app.use("/api/v1/auth", authRouter),
-    app.use("/api/v1/users", userRouter),
-    app.use("/api/v1/reviews", reviewRouter),
-    app.use("/api/v1/addresses", addressRouter),
-    app.use("/api/v1/wishLists", wishListRouter),
-    app.use("/api/v1/coupons", couponRouter);
+  app.use("/api/v1/users", userRouter),
+  app.use("/api/v1/reviews", reviewRouter),
+  app.use("/api/v1/addresses", addressRouter),
+  app.use("/api/v1/wishLists", wishListRouter),
+  app.use("/api/v1/coupons", couponRouter);
   app.use("/api/v1/carts", CartRouter),
-    app.use("/api/v1/orders", orderRouter),
-    // Page Not Found
-    app.use("*", (req, res, next) => {
-      return next(
-        new Error(`Page Not Found ${req.originalUrl}`, { cause: 404 })
-      );
-    });
+  app.use("/api/v1/orders", orderRouter),
+
+  // Page Not Found
+  app.use("*", (req, res, next) => {
+    return next(
+      new Error(`Page Not Found ${req.originalUrl}`, { cause: 404 })
+    );
+  });
+  
   //GLOBAL ERROR
-  app.use(globalError);
+  app.use(globalError, rollbackUploadFile, rollbackSavedDoc);
 };

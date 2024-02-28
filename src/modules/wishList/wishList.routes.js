@@ -1,9 +1,8 @@
 import { Router } from "express";
 import * as WishListController from "./wishList.controller.js";
 import { validation } from "../../middlewares/validation.middleware.js";
-import { uploadSingleFile } from "../../services/fileUploads/multer.js";
-import { allowTo, protectedRoute } from "../auth/auth.controller.js";
 import * as JoiVal from "./wishList.validation.js";
+import { allowTo, protectedRoute } from "../../middlewares/auth.js";
 
 const wishListRouter = Router();
 

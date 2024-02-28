@@ -7,6 +7,7 @@ const adduser = asyncHandler(async (req, res) => {
   let user = new User(req.body);
 
   await user.save();
+  req.savedDocument = { model: User, condition: user._id };
 
   res.status(201).json({ message: "user added successfuly" });
 });
@@ -16,12 +17,13 @@ const allUsers = asyncHandler(async (req, res) => {
     .fields()
     .sort()
     .pagination()
-    .filter()
-    .search();
-  const users = await apiFeature.mongoQuery;
-  // let users = await User.find(filterObj).populate("category");
+    .filter();
+
+  const users = await apiFeature.mongoQuery.populate([
+    { path: "wishList", select: "title" },
+  ]);
   res.status(200).json({ message: "All user", users });
-}); // api feature with merge param
+});
 
 const Oneuser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
@@ -36,9 +38,13 @@ const updateuser = asyncHandler(async (req, res, next) => {
     _id: { $ne: req.user._id },
   });
   isExisit && next(new Error("sorry it is not your email", { cause: 400 }));
-  const user = await User.findByIdAndUpdate(req.user._id, {...req.body}, {
-    new: true,
-  });
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    { ...req.body },
+    {
+      new: true,
+    }
+  );
   !user && res.status(404).json({ message: "user Not found" });
   user && res.status(200).json({ message: "user updated", user });
 });
