@@ -1,50 +1,90 @@
 import { asyncHandler } from "../../middlewares/asyncHandler.js";
 import { ApiFeature } from "../../utils/ApiFeature.js";
 import Coupon from "../../../DB/models/coupon.model.js";
-import randomstring from "randomstring";
+import CouponUsers from "../../../DB/models/coupon.users.model.js";
+import User from "../../../DB/models/user.model.js";
+import { applyCouponChecks } from "./service/applay.service.js";
 
 const addCoupon = asyncHandler(async (req, res, next) => {
-  // generate code
-  const code = randomstring.generate({
-    length: 8,
-    charset: "alphanumeric",
-  });
+  const { code, discount, isFixed, isPercentage, fromDate, toDate, users } =
+    req.body;
+  // check dublicate coupon
+  const isCoupon = await Coupon.findOne({ code });
+  if (isCoupon) {
+    return next(
+      new Error(`there is a coupon with the same code ${code}`, { cause: 409 })
+    );
+  }
+  //check on discount number
+  if (isFixed == isPercentage) {
+    return next(
+      new Error(`coupon can be either Fixed or Percentage`, { cause: 400 })
+    );
+  }
+  if (isPercentage) {
+    if (discount > 100) {
+      return next(
+        new Error(`coupon Percentage cant be ${isPercentage}% !!!`, {
+          cause: 400,
+        })
+      );
+    }
+  }
   // create Coupon
   const coupon = await Coupon.create({
-    code,
+    ...req.body,
     createdBy: req.user._id,
-    discount: req.body.discount,
-    expires: new Date(req.body.expires).getTime(),
   });
-  req.savedDocument = { model: Coupon, condition: coupon._id };
 
+  // let ids = [];
+  // for (const user of user) {
+  //   ids.push(user.ids)
+  // }
+  // const isUser = await User.find({ _id: { $in: ids } });
+  // if (isUser.length != users.length) {
+  //   return next(new Error(`user not found`, { cause: 404 }));
+  // }
+  // const allowedUser = await CouponUsers.create(
+  //   users.map((ele) => ({ ...ele, code: coupon._id }))
+  // );
   res.status(201).json({ message: "Coupon added successfuly", coupon });
 });
 
-const allCoupons = asyncHandler(async (req, res ) => {
+const applyCoupon = asyncHandler(async (req, res, next) => {
+  const { code } = req.body;
+  const { _id:userId } = req.user._id;
+const couponValid = await applyCouponChecks(code ,userId )
+if(couponValid.status){
+  return next({message:couponValid.msg , cause:couponValid.status})
+}
+  //send res
+  res.status(201).json({ message: "apply Coupon siccessfully", coupon:couponValid });
+});
+
+const allCoupons = asyncHandler(async (req, res) => {
   let apiFeature = new ApiFeature(Coupon.find({}), req.query)
     .fields()
     .sort()
     .pagination()
-    .filter()
+    .filter();
   const coupons = await apiFeature.mongoQuery.lean();
   res.status(201).json({ message: "All Coupons", coupons });
 });
 
 const OneCoupon = asyncHandler(async (req, res) => {
   const coupon = await Coupon.findById(req.params.id).lean();
-  if(!coupon) return res.status(404).json({ message: "Coupon Not found" });
-   res.status(200).json({ message: "Coupon of this Id:", coupon });
+  if (!coupon) return res.status(404).json({ message: "Coupon Not found" });
+  res.status(200).json({ message: "Coupon of this Id:", coupon });
 });
 
-const updateCoupon = asyncHandler(async (req, res,next) => {
+const updateCoupon = asyncHandler(async (req, res, next) => {
   // check coupon
   const coupon = await Coupon.findOne({
     code: req.params.code,
     createdBy: req.user._id,
     expires: { $gt: Date.now() },
   });
-  if(!coupon) return res.status(404).json({ message: "Invalid Coupon" });
+  if (!coupon) return res.status(404).json({ message: "Invalid Coupon" });
   // check owner
   if (coupon.createdBy.toString() !== req.user._id.toString())
     return next(new Error("you are not authorized", { cause: 401 }));
@@ -55,24 +95,24 @@ const updateCoupon = asyncHandler(async (req, res,next) => {
     : coupon.expires;
 
   await coupon.save();
-   res.status(200).json({ message: "Coupon updated", coupon });
+  res.status(200).json({ message: "Coupon updated", coupon });
 });
 
-const deleteCoupon = asyncHandler(async (req, res,next) => {
-    // check coupon
-    const coupon = await Coupon.findOne({
-      code: req.params.code,
-      createdBy: req.user._id,
-      expires: { $gt: Date.now() },
-    });
-    if(!coupon) return res.status(404).json({ message: "Coupon Not found" });
-    // check owner
-    if (req.user._id.toString() !== coupon.createdBy.toString())
-      return next(new Error("you are not authorized", { cause: 401 }));
-  // delete 
+const deleteCoupon = asyncHandler(async (req, res, next) => {
+  // check coupon
+  const coupon = await Coupon.findOne({
+    code: req.params.code,
+    createdBy: req.user._id,
+    expires: { $gt: Date.now() },
+  });
+  if (!coupon) return res.status(404).json({ message: "Coupon Not found" });
+  // check owner
+  if (req.user._id.toString() !== coupon.createdBy.toString())
+    return next(new Error("you are not authorized", { cause: 401 }));
+  // delete
   await coupon.deleteOne();
 
-   res.status(200).json({ message: "Coupon deleted", coupon }); 
-})
+  res.status(200).json({ message: "Coupon deleted", coupon });
+});
 
-export { addCoupon, allCoupons, deleteCoupon, updateCoupon, OneCoupon };
+export { addCoupon,applyCoupon, allCoupons, deleteCoupon, updateCoupon, OneCoupon };

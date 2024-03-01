@@ -26,7 +26,6 @@ const addProduct = asyncHandler(async (req, res, next) => {
       })
     );
   }
-  console.log(brand.createdBy.toString());
   //calc total price of product or hook pre save
   const priceAfterDiscount = Number.parseInt(
     price - (price * discount || 0) / 100

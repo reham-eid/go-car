@@ -14,9 +14,28 @@ const CouponSchema = new Schema(
       type: Number,
       required: true,
       min: 1,
-      max: 80,
     },
-    expires: Date,
+    isFixed:{
+      type: Boolean,
+      default:false
+    },
+    isPercentage:{
+      type: Boolean,
+      default:false
+    },
+    fromDate:{
+      type: Date,
+      required:true,
+    },
+    toDate:{
+      type: Date,
+      required:true,
+    },
+    status:{
+      type:String,
+      enum:['expired' , 'valid'],
+      default:'valid'
+    },
     createdBy: {
       type: Types.ObjectId,
       ref: "user",

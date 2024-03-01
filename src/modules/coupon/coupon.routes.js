@@ -6,6 +6,12 @@ import { allowTo, protectedRoute } from "../../middlewares/auth.js";
 
 const couponRouter = Router();
 
+couponRouter.put("/apply-coupon",
+    protectedRoute,
+    allowTo("user"),
+    validation(JoiVal.paramsIdVal),
+    CouponController.applyCoupon
+  )
 couponRouter.use(protectedRoute, allowTo("admin"));
 couponRouter
   .route("/")

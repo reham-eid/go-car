@@ -12,9 +12,6 @@ const addToCartVal = Joi.object({
 const paramsIdVal = Joi.object({
   id:generalField.id.required(),
 });
-const applyCouponVal = Joi.object({
-  coupon:generalField.name.required(),
-});
 const updateQuantity = Joi.object({
   id:generalField.id.required(),
 

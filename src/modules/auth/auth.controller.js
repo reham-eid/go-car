@@ -58,12 +58,12 @@ const logIn = asyncHandler(async (req, res, next) => {
   if (!user) return next(new Error("User Not found", { cause: 404 }));
   //check isEmailConfirm
   if (!user.isEmailConfirm) {
-    next(new Error("please acctive your account first", { cause: 400 }));
+    return next(new Error("please acctive your account first", { cause: 400 }));
   }
   //compare password
   const match = bcryptjs.compareSync(password, user.password);
   if (!match) {
-    next(new Error("Incorrect Password", { cause: 400 }));
+    return next(new Error("Incorrect Password", { cause: 400 }));
   }
   //generate token
   const token = jwt.sign(

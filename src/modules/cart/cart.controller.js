@@ -1,114 +1,98 @@
 import { Cart } from "../../../DB/models/cart.model.js";
-import Coupon from "../../../DB/models/coupon.model.js";
 import Product from "../../../DB/models/product.model.js";
 import { asyncHandler } from "../../middlewares/asyncHandler.js";
-
-const pricCalc = async (model) => {
-  let totalPrice = 0;
-  model.cartItems.forEach((item) => {
-    totalPrice += item.quantity * item.price;
-     totalPrice - ( totalPrice * item.discount || 0) / 100
-  });
-  model.totalPrice = totalPrice;
-
-  await model.save();
-};
+import { pricCalc } from "./services/calcPrice.js";
+import { createCart } from "./services/create.cart.js";
 
 const addCart = asyncHandler(async (req, res, next) => {
+  const { productId, quantity } = req.body;
   // check productId if exisit or not
-  const product = await Product.findById(req.body.productId);
+  const product = await Product.findById(productId);
   if (!product) return next(new Error("product not found", { cause: 404 }));
   // check productQuantity
-  if (!product.inStock(req.body.quantity))
+  if (!product.inStock(quantity))
     return next(
       new Error(`sorry, only ${product.quantity} items is avaliable`, {
         cause: 400,
       })
     );
-  // put product.price in res
-  req.body.price = product.price;
-
   // one cart per user
   const isCart = await Cart.findOne({ user: req.user._id });
   // check if cart exisit or not
 
-  //if not exisit {create cart, push product}
+  //if not exisit {create cart with first product}
   if (!isCart) {
-    const cart = new Cart({
-      user: req.user._id,
-      cartItems: [req.body],
-      discount: req.body.discount,
-    });
-    //calc total price
-    await pricCalc(cart);
+    const cart = createCart(req.user._id, product, productId, quantity);
+    // rollback middleware
     req.savedDocument = { model: Cart, condition: cart._id };
-
-    if (product.discount) {
-      
-    }
-    if (!cart) return res.status(404).json({ message: "cart Not found" });
     res.status(201).json({ message: "added to cart successfully ", cart });
   } else {
-    //if exisit { push product}{if product>> its quantity >> check quantity in db}
+    //if exisit { push new product}{if product>> check quantity in db >> ++ quantity }
     // find if body.product === cartItems.product (same product)
-    let item = isCart.cartItems.find((i) => i.productId == req.body.productId); // shallow copy
-    //then add one product in quantity
+    let item = isCart.cartItems.find((i) => i.productId == productId); // shallow copy
 
+    //then add quantity in one product
     if (item) {
       //check quantity in db مع كل مره بيزود
       if (item.quantity >= product.quantity)
         return next(new Error("product sold out"));
-      item.quantity += req.body.quantity || 1;
+      item.quantity += quantity || 1;
+      item.finalPrice += item.price * quantity;
+      // calc with new quantity & save in db
+      await pricCalc(isCart);
     }
 
     // else push new product to cartItems
-    else isCart.cartItems.push(req.body);
+    else {
+      isCart.cartItems.push({
+        name: product.title,
+        description: product.description,
+        productId: productId,
+        quantity: quantity,
+        price: product.priceAfterDiscount,
+        finalPrice: product.priceAfterDiscount * quantity,
+      });
+      // calc with new quantity & save in db
+      await pricCalc(isCart);
+    }
 
-    // calc total price
-    await pricCalc(isCart);
-
-    // save in db
+    // rollback middleware
+    req.savedDocument = { model: Cart, condition: isCart._id };
     // send res
     res
       .status(201)
       .json({ message: "added to cart successfully ", cart: isCart });
   }
 });
-
-const applyCoupon = asyncHandler(async (req, res, next) => {
-  // check coupon in couponModel
-  const coupon = await Coupon.findOne({
-    code: req.body.coupon,
-    expires: { $gt: Date.now() },
-  });
-  if (!coupon) return next(new Error("Invalid Coupon", { cause: 404 }));
-  // check cart
-  const cart = await Cart.findOne({ user: req.user._id });
-  // calc totalPriceAfterDiscount
-  const totalPrice = cart.totalPrice;
-  const totalPriceAfterDiscount = (
-    totalPrice -
-    (totalPrice * coupon.discount) / 100
-  ).toFixed(2);
-  cart.totalPriceAfterDiscount = totalPriceAfterDiscount;
-  await cart.save();
-  //send res
-  res.status(201).json({ message: "apply Coupon siccessfully", cart });
-});
 const removeItemFromCart = asyncHandler(async (req, res, next) => {
   // check productId if exisit or not
   const product = await Product.findById(req.params.id);
-  !product && next(new Error("product not found", { cause: 404 }));
-
-  const cart = await Cart.findOneAndUpdate(
-    { user: req.user._id, cartItems: { $elemMatch: req.params.id } }, //
-    { $pull: { cartItems: { productId: req.params.id } } }, //{ _id: req.params.id }
-    { new: true }
-  );
-  if (!cart)
+  if (!product) return next(new Error("product not found", { cause: 404 }));
+  //  const cart = await Cart.aggregate([
+  //     {
+  //       $match: { "user": new Types.ObjectId(req.user._id) },
+  //     },
+  //     {
+  //       $unwind: "$cartItems",
+  //     },
+  //     {
+  //       $match: { "cartItems.productId": req.params.id}
+  //     },
+  //     ,
+  //     {
+  //       $project:{'cartItems.productId' : 1}
+  //     }
+  //   ]);
+  const cart = await Cart.findOne({
+    user: req.user._id,
+    "cartItems.productId": req.params.id,
+  });
+  console.log(cart);
+  if (!cart) {
     return res
       .status(404)
-      .json({ message: "cart Not found or product not found this cart" });
+      .json({ message: "cart Not found or product not found in this cart" });
+  }
   if (cart.cartItems.length === 0) {
     await cart.deleteOne();
     return res.status(404).json({
@@ -116,25 +100,18 @@ const removeItemFromCart = asyncHandler(async (req, res, next) => {
       message: "cart is empty",
     });
   }
+  cart.cartItems = cart.cartItems.filter((item) => {
+    item.productId.toString() !== req.params.id;
+  });
+  console.log(cart.cartItems);
   await pricCalc(cart); // reCalc
-  cart && res.status(200).json({ message: "cart updated", cart });
+  res.status(200).json({ message: "product deleted from cart updated", cart });
 });
 
 const updateQuantity = asyncHandler(async (req, res, next) => {
-  // check cart
-  // const cart = await Cart.findOne({ user: req.user._id });
-  // // if not exisit res
-  // !cart && res.status(404).json({ message: "cart Not found" });
-
-  // // get cartItems id for update quantity of certien item
-  // let item = cart.cartItems.find((item) => item._id == req.params.id);
-  // if (!item) return next(new Error("item not found", { cause: 404 }));
-  // // update quantity of item
-  // item.quantity = req.body.quantity;
-
   // check productId if exisit or not
   const product = await Product.findById(req.params.id);
-  !product && next(new Error("product not found", { cause: 404 }));
+  if(!product) return next(new Error("product not found", { cause: 404 }));
 
   if (!product.inStock(req.body.quantity))
     return next(
@@ -148,10 +125,11 @@ const updateQuantity = asyncHandler(async (req, res, next) => {
     { "cartItems.$.quantity": req.body.quantity },
     { new: true }
   );
-  if (!cart)
+  if (!cart) {
     return res
       .status(404)
       .json({ message: "cart Not found or product not found this cart" });
+  }
   // calc price
   await pricCalc(cart);
   // save
@@ -191,7 +169,6 @@ const clearUserCart = asyncHandler(async (req, res) => {
 });
 export {
   addCart,
-  applyCoupon,
   removeItemFromCart,
   updateQuantity,
   getAllCart,

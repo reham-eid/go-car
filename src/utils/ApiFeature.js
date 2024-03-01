@@ -4,14 +4,13 @@ export class ApiFeature {
     this.query = query;
   }
 
-  pagination({ size = 3 }) {
+  pagination({ size = 2 } ={}) {
     if (this.query?.page <= 0) this.query.page = 1;
     let PAGE_NUMBER = this.query?.page * 1 || 1; // if string(NAN || 1)
     let PAGE_LIMIT = size;
     let SKIP = (PAGE_NUMBER - 1) * PAGE_LIMIT;
 
     this.mongoQuery = this.mongoQuery.skip(SKIP).limit(PAGE_LIMIT);
-
     return this;
   }
 
@@ -22,7 +21,7 @@ export class ApiFeature {
     //   delete filterObj[q];
     // }); or strictQuery
     filterObj = JSON.stringify(filterObj);
-    filterObj = filterObj.replace(/(gt|gte|lt|lte)/g, (match) => `$${match}`);
+    filterObj = filterObj.replace(/(gt|gte|lt|lte|ne|regex)/g, (match) => `$${match}`);
     filterObj = JSON.parse(filterObj);
     this.mongoQuery.find(filterObj);
     return this;

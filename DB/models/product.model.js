@@ -109,7 +109,7 @@ const productSchema = new Schema(
 
 // check productQuantity
 productSchema.methods.inStock = function (quantity) {
-  return this.quantity >= quantity ? true : false;
+  return this.quantity <  quantity ? false : true;
 };
 
 productSchema.virtual("reviews", {

@@ -6,12 +6,6 @@ import { allowTo, protectedRoute } from "../../middlewares/auth.js";
 
 const CartRouter = Router();
 
-CartRouter.put("/apply-coupon",
-    protectedRoute,
-    allowTo("user"),
-    validation(JoiVal.applyCouponVal),
-    CartController.applyCoupon
-  )
 CartRouter.route("/")
   .post(
     protectedRoute,
@@ -20,7 +14,6 @@ CartRouter.route("/")
     CartController.addCart
   )
   .get(protectedRoute, allowTo("user"), CartController.getLogedUserCart)
-
   .delete(protectedRoute, allowTo("user"), CartController.clearUserCart);
 
 CartRouter.route("/:id")
@@ -30,7 +23,7 @@ CartRouter.route("/:id")
     validation(JoiVal.paramsIdVal),
     CartController.getAllCart
   )
-  .delete(
+  .put(
     protectedRoute,
     allowTo("user", "admin"),
     validation(JoiVal.paramsIdVal),

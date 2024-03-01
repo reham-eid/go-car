@@ -15,24 +15,41 @@ const CartSchema = new Schema(
         },
         quantity: {
           type: Number,
+          required: true,
           default: 1,
         },
-        price: Number,
+        price: {
+          type: Number,
+          required: true,
+          default: 0,
+        },
+        finalPrice: {
+          // price * quantity
+          type: Number,
+          required: true,
+        },
+        name: {
+          type: String,
+          unique: [true, "Product title already Exisit "],
+          trim: true,
+          required: true,
+          maxLength: 50,
+          minLength: [2, "too short of Product title "],
+        },
+        description: {
+          type: String,
+          required: true,
+          maxLength: 100,
+          minLength: [10, "too short of Product description "],
+        },
       },
     ],
-    discount: {
-      type: Number,
-      ref:"product"
-    },
-    totalPrice: Number,
-    totalPriceAfterDiscount: Number,
+    totalPrice: Number
   },
   {
     timestamps: true,
     strictQuery: true,
   }
 );
-//virtual ref on product
-
 
 export const Cart = model("cart", CartSchema);

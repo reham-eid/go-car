@@ -16,6 +16,7 @@ import { createHandler } from "graphql-http/lib/use/express";
 import ducumentQL from "graphql-playground-middleware-express";
 import { schema } from "./modules/graphQL.js";
 import { rollbackSavedDoc, rollbackUploadFile } from "./middlewares/rollback.js";
+// import { job } from "./utils/crons.js";
 const expressPlayground = ducumentQL.default;
 
 export const init = (app) => {
@@ -44,4 +45,5 @@ export const init = (app) => {
   
   //GLOBAL ERROR
   app.use(globalError, rollbackUploadFile, rollbackSavedDoc);
+  // job()
 };
