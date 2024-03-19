@@ -290,7 +290,7 @@ const payWithStripe = asyncHandler(async (req, res, next) => {
 });
 
 const stripeWebhookLocal = asyncHandler(async (req, res, next) => {
-  const orderId = req.body.data.object.metadata.OrderId
+  const orderId = req.body.data.object.metadata.OrderId;
   console.log("webhook :  ", req.body.data.object.metadata.OrderId);
 
   const confirmOrder = await Order.findById(orderId);
@@ -309,7 +309,46 @@ const stripeWebhookLocal = asyncHandler(async (req, res, next) => {
   await confirmOrder.save();
   res.status(200).json({ message: "webhook received" });
 });
+const stripeWebhook = asyncHandler(async (req, res) => {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  const sig = req.headers["stripe-signature"];
 
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+  } catch (err) {
+    res.status(400).send(`Webhook Error: ${err.message}`);
+    return;
+  }
+
+  // Handle the event
+  if (event.type == "checkout.session.async_payment_failed") {
+    const orderId = event.data.object.metadata.OrderId;
+    await Order.findByIdAndUpdate(
+      { _id: orderId },
+      {
+        statusOfOrder: orderStatus.failedToPaied,
+        isPaid: false,
+      }
+    );
+    return;
+  } else if (event.type == "checkout.session.completed") {
+    const orderId = event.data.object;
+    await Order.findByIdAndUpdate(
+      { _id: orderId },
+      {
+        statusOfOrder: orderStatus.paied,
+        isPaid: true,
+        paidAt: Date.now(),
+      }
+    );
+    return;
+  } else {
+    console.log(`Unhandled event type ${event.type}`);
+  }
+});
 const refundOrder = asyncHandler(async (req, res, next) => {
   const { orderId } = req.params;
   const { _id: user } = req.user;
@@ -326,15 +365,19 @@ const refundOrder = asyncHandler(async (req, res, next) => {
   isOrder.statusOfOrder = orderStatus.refunded;
   await isOrder.save();
 
-  res.status(200).json({ message: "order refunded successfully", refundOrder :refundedOrder});
+  res.status(200).json({
+    message: "order refunded successfully",
+    refundOrder: refundedOrder,
+  });
 });
 export {
   stripeWebhookLocal,
+  stripeWebhook,
   createOrder,
   createCashOrderFromCart,
   deliveredOrder,
   payWithStripe,
   refundOrder,
   OneOrder,
-  allOrders
+  allOrders,
 };

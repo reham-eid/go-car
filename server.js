@@ -14,18 +14,9 @@ await connectDB();
 if (process.env.NODE_ENV == "development") {
   app.use(morgan("dev"));
 }
-
 app.use(cors());
-app.use((req, res, next) => {
-  if (req.originalUrl === "/api/v1/orders/webhook") {
-    return next();
-  }
-  express.json()(req, res, next);
-});
-app.use(express.urlencoded({ extended: true }));
-
 // API routes
-init(app);
+init(app,express);
 
 const port = 4001;
 
