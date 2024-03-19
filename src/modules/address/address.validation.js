@@ -11,7 +11,6 @@ const updateAddress = Joi.object({
   id: generalField.id.required(),
 
   street:generalField.name,
-  phone:generalField.name,
   city:generalField.name,
 });
 

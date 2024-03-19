@@ -5,16 +5,16 @@ import * as JoiVal from "./category.validation.js";
 import { uploadSingleFile } from "../../services/fileUploads/multer.js";
 import SubCategoryRouter from "../subCategory/subCategory.routes.js";
 import { allowTo, protectedRoute } from "../../middlewares/auth.js";
+import { status } from "../../utils/system.roles.js";
 
 const categoryRouter = Router();
 //Merge param
 categoryRouter.use("/:category/subcategories", SubCategoryRouter);
 
+categoryRouter.use(protectedRoute, allowTo(status.admin));
 categoryRouter
   .route("/")
   .post(
-    protectedRoute,
-    allowTo('admin'),
     uploadSingleFile("img-category"),
     validation(JoiVal.addCategoryVal),
     CategoryController.addCategory
@@ -25,17 +25,10 @@ categoryRouter
   .route("/:id")
   .get(validation(JoiVal.paramsIdVal), CategoryController.OneCategory)
   .put(
-    protectedRoute,
-    allowTo('admin'),
     uploadSingleFile("img-category"),
     validation(JoiVal.updateCategoryVal),
     CategoryController.updateCategory
   )
-  .delete(
-    protectedRoute,
-    allowTo('admin'),
-    validation(JoiVal.paramsIdVal),
-    CategoryController.deleteCategory
-  );
+  .delete(validation(JoiVal.paramsIdVal), CategoryController.deleteCategory);
 
 export default categoryRouter;

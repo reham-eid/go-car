@@ -80,7 +80,6 @@ const updateCategory = asyncHandler(async (req, res, next) => {
   if (req.body.name) {
     // check req.body.name the same in db
     if (req.body.name === category.name && category._id.toString() === req.params.id) {
-      console.log(req.body.name == category.name);
       return next({
         cause: 400,
         message: "already the same category name.. updated if you want",

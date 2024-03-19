@@ -80,7 +80,7 @@ const productSchema = new Schema(
       ref: "category",
       required: true,
     },
-    subcategoryId: {
+    subCategoryId: {
       type: Types.ObjectId,
       ref: "subcategory",
       required: true,
@@ -97,16 +97,7 @@ const productSchema = new Schema(
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   }
-);
-
-// productSchema.post("save", function () {
-//   if (this.isModified(("discount")))
-//     this.priceAfterDiscount =  Number.parseInt(
-//       this.price - (this.price * this.discount ) / 100
-//     )
-//   return this;
-// });
-
+); 
 // check productQuantity
 productSchema.methods.inStock = function (quantity) {
   return this.quantity <  quantity ? false : true;

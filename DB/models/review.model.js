@@ -5,15 +5,15 @@ const ReviewSchema = new Schema(
     comment: {
       type: String,
       trim: true,
-      required: true,
-      minLength: [2, "too short of Review comment "],
-      maxLength: [500, "too long of Review comment "],
-
+      minLength: [2, "too short Review comment "],
+      maxLength: [500, "too long Review comment "],
     },
     rate: {
       type: Number,
-      min: 0,
+      required: true,
+      min: 1,
       max: 5,
+      enum:[1,2,3,4,5]
     },
     productId: {
       type: Types.ObjectId,

@@ -1,5 +1,6 @@
 import { Schema, Types, model } from "mongoose";
 import bcryptjs from "bcryptjs";
+import { status, systemRoles } from "../../src/utils/system.roles.js";
 
 const userSchema = new Schema(
   {
@@ -27,8 +28,8 @@ const userSchema = new Schema(
     },
     role: {
       type: String,
-      enum: ["user", "admin"],
-      default: "user",
+      enum: Object.values(systemRoles),
+      default: systemRoles.user,
     },
     wishList: [
       {
@@ -36,20 +37,21 @@ const userSchema = new Schema(
         ref: "product",
       },
     ],
+    phone: {
+      type: String,
+      unique: true,
+      trim: true,
+    },
     addresses: [
       {
         street: String,
-        phone: String,
         city: String,
       },
     ],
-    isDeleted: {
-      type: Boolean,
-      default: false,
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
+    status: {
+      type: String,
+      enum: Object.values(status),
+      default: status.offline,
     },
     isEmailConfirm: {
       type: Boolean,
@@ -59,23 +61,25 @@ const userSchema = new Schema(
       type: String,
       unique: false,
     },
-    isBlocked: {
-      type: Boolean,
-      default: false,
-    },
+    token: String,
+    provider:{
+      type:String,
+      enum:["GOOGLE","System"],
+      default:"System"
+    }
   },
   { timestamps: true, strictQuery: true }
 );
 userSchema.pre("save", function () {
-  if (this.isModified(("password")))
+  if (this.isModified("password")) {
     this.password = bcryptjs.hashSync(this.password, +process.env.SALT);
+  }
   return this;
 });
-userSchema.pre("findOneAndUpdate", function () {
+userSchema.pre("findOneAndUpdate", function (next) {
   // console.log(this._update.password);
-  if (this._update.password)
-    {
-      this._update.password = bcryptjs.hashSync(
+  if (this._update.password) {
+    this._update.password = bcryptjs.hashSync(
       this._update.password,
       +process.env.SALT
     );

@@ -1,5 +1,6 @@
 import Joi from "joi";
 import { validateObjectId } from "../middlewares/validation.middleware.js";
+import { systemRoles } from "./system.roles.js";
 
 const generalField = {
   name: Joi.string().trim(),
@@ -12,15 +13,15 @@ const generalField = {
   password: Joi.string().pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")),
   confirmPassword: Joi.valid(Joi.ref("password")),
   age: Joi.number().min(10),
-  role: Joi.string().valid("user", "admin"),
+  role: Joi.string().valid(...Object.values(systemRoles)),
   id: Joi.string().custom(validateObjectId),
   address: Joi.object({
     street: Joi.string(),
-    phone: Joi.string().pattern(
-      new RegExp("^[+]?[(]?[0-9]{3}[)]?[-s.]?[0-9]{3}[-s.]?[0-9]{4,6}$")
-    ),
     city: Joi.string(),
   }),
+  phone: Joi.string().pattern(
+    new RegExp("^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$")
+  ),
   file: Joi.object({
     fieldname: Joi.string().required(),
     originalname: Joi.string().required(),

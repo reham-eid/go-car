@@ -3,7 +3,7 @@ import { ApiFeature } from "../../utils/ApiFeature.js";
 import Coupon from "../../../DB/models/coupon.model.js";
 import CouponUsers from "../../../DB/models/coupon.users.model.js";
 import User from "../../../DB/models/user.model.js";
-import { applyCouponChecks } from "./service/applay.service.js";
+import {  CouponValidation } from "./service/coupon.service.js";
 
 const addCoupon = asyncHandler(async (req, res, next) => {
   const { code, discount, isFixed, isPercentage, fromDate, toDate, users } =
@@ -36,24 +36,25 @@ const addCoupon = asyncHandler(async (req, res, next) => {
     createdBy: req.user._id,
   });
 
-  // let ids = [];
-  // for (const user of user) {
-  //   ids.push(user.ids)
-  // }
-  // const isUser = await User.find({ _id: { $in: ids } });
-  // if (isUser.length != users.length) {
-  //   return next(new Error(`user not found`, { cause: 404 }));
-  // }
-  // const allowedUser = await CouponUsers.create(
-  //   users.map((ele) => ({ ...ele, code: coupon._id }))
-  // );
-  res.status(201).json({ message: "Coupon added successfuly", coupon });
+  let ids = [];
+  for (const user of users) {
+    ids.push(user.userId)
+  }
+  const isUser = await User.find({ _id: { $in: ids } });
+
+  if (isUser.length != users.length) {
+    return next(new Error(`user not found`, { cause: 404 }));
+  }
+  const allowedUser = await CouponUsers.create(
+    users.map((ele) => ({ ...ele, code: coupon._id }))
+  );
+  res.status(201).json({ message: "Coupon added successfuly", coupon ,allowedUser});
 });
 
 const applyCoupon = asyncHandler(async (req, res, next) => {
   const { code } = req.body;
   const { _id:userId } = req.user._id;
-const couponValid = await applyCouponChecks(code ,userId )
+const couponValid = await CouponValidation(code ,userId )
 if(couponValid.status){
   return next({message:couponValid.msg , cause:couponValid.status})
 }

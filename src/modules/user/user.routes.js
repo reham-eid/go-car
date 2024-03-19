@@ -3,6 +3,7 @@ import { validation } from "../../middlewares/validation.middleware.js";
 import * as userValidation from "./user.validation.js";
 import * as userController from "./user.controller.js";
 import { allowTo, protectedRoute } from "../../middlewares/auth.js";
+import { systemRoles } from "../../utils/system.roles.js";
 
 const userRouter = Router();
 
@@ -13,21 +14,21 @@ userRouter
   .post(
     "/add_user",
     protectedRoute,
-    allowTo("admin"),
+    allowTo(systemRoles.admin),
     validation(userValidation.addUserVal),
     userController.adduser
   )
   .put(
     "/update_user/",
-    protectedRoute,
-    allowTo("admin","user"),
+      protectedRoute,
+    allowTo(systemRoles.admin, systemRoles.user),
     validation(userValidation.updateUserVal),
     userController.updateuser
   )
   .delete(
     "/delete_user/:id",
     protectedRoute,
-    allowTo("admin"),
+    allowTo(systemRoles.admin),
     validation(userValidation.paramsIdVal),
     userController.deleteuser
   );

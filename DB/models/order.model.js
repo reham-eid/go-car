@@ -1,4 +1,6 @@
 import { Schema, Types, model } from "mongoose";
+import { orderStatus, payStatus } from "../../src/utils/system.roles.js";
+import mongoose from "mongoose";
 
 const orderSchema = new Schema(
   {
@@ -17,41 +19,57 @@ const orderSchema = new Schema(
           default: 1,
         },
         name: String,
-        itemPrice: Number,
+        description: String,
+        price: Number,
       },
     ],
     shippingAddress: {
       street: String,
-      phone: String,
       city: String,
     },
-    payment: {
-      type: String,
-      enum: ["cash", "visa"],
-      default: "cash",
-    },
+    phoneNumbers: [
+      {
+        type: String,
+        required: true,
+      },
+    ],
     totalOrderPrice: {
       type: Number,
       required: true,
     },
+    coupon: {
+      type: Types.ObjectId,
+      ref: "coupon",
+    },
+    totalOrderPriceAfterDiscount: {
+      //totalOrderPrice - coupon
+      type: Number,
+      required: true,
+    },
+    payment_intent:String,
     invoice: {
       url: { type: String },
       id: { type: String },
     },
-    status: {
+    payment: {
       type: String,
-      enum: [
-        "placed",
-        "shipped",
-        "cancled",
-        "delivered",
-        "refunded",
-        "visa payed",
-        "failed to payed",
-      ],
-      default: "placed",
+      enum: Object.values(payStatus),
+      required: true,
+    },
+    statusOfOrder: {
+      type: String,
+      enum: Object.values(orderStatus),
+      default: orderStatus.pending,
+      required: true,
+    },
+    isDelivered: {
+      type: Boolean,
+      default: false,
     },
     deliveredAt: Date,
+    deliveredBy: { type: Types.ObjectId, ref: "user" },
+    canclledAt: Date,
+    canclledBy: { type: Types.ObjectId, ref: "user" },
     isPaid: {
       type: Boolean,
       default: false,
@@ -61,13 +79,5 @@ const orderSchema = new Schema(
   { timestamps: true, strictQuery: true }
 );
 
-// orderSchema.virtual("finalPrice").get(function () {
-//   return this.coupon
-//     ? Number.parseInt(
-//         this.totalOrderPrice -
-//           (this.totalOrderPrice * this.coupon.discount) / 100
-//       )
-//     : this.totalOrderPrice;
-// });
-const Order = model("order", orderSchema);
-export default Order;
+export default model("order", orderSchema);
+//mongoose.models.order ||

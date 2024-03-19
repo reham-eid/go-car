@@ -4,37 +4,57 @@ import { validation } from "../../middlewares/validation.middleware.js";
 import * as JoiVal from "./order.validation.js";
 import express from "express";
 import { allowTo, protectedRoute } from "../../middlewares/auth.js";
+import { systemRoles } from "../../utils/system.roles.js";
 const orderRouter = Router();
 
 orderRouter.post(
   "/webhook",
   express.json({ type: "application/json" }), // req.body>>buffer data
-  OrderController.createOnlineOrder
+  OrderController.stripeWebhookLocal
 ); //stripe
 
 orderRouter
-  .route("/:cartId")
+  .route("/:id")
   .post(
     protectedRoute,
-    allowTo("user"),
+    allowTo(systemRoles.user),
     validation(JoiVal.addOrderVal),
-    OrderController.createCashOrder
-  );
+    OrderController.createCashOrderFromCart
+  )
+  .put(
+    protectedRoute,
+    allowTo(systemRoles.delievery),
+    validation(JoiVal.paramsIdVal),
+    OrderController.deliveredOrder
+  )
 orderRouter.post(
-  "/checkout/:id",
+  "/pay-with-stripe/:orderId",
   protectedRoute,
-  allowTo("user"),
+  allowTo(systemRoles.user),
   validation(JoiVal.paramsIdVal),
-  OrderController.createCheckoutSession
+  OrderController.payWithStripe
+);
+orderRouter.post(
+  "/refund-order/:orderId",
+  protectedRoute,
+  allowTo(systemRoles.admin),
+  validation(JoiVal.paramsIdVal),
+  OrderController.refundOrder
 );
 orderRouter.get(
   "/all",
   protectedRoute,
-  allowTo("admin"),
+  allowTo(systemRoles.admin),
   OrderController.allOrders
 );
 orderRouter
   .route("/")
-  .get(protectedRoute, allowTo("user"), OrderController.OneOrder);
+  .get(protectedRoute, allowTo(systemRoles.user), OrderController.OneOrder)
+  .post(
+    protectedRoute,
+    allowTo(systemRoles.user),
+    validation(JoiVal.addFastOrderVal),
+    OrderController.createOrder
+  )
 
 export default orderRouter;

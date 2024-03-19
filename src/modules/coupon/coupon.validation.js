@@ -5,16 +5,15 @@ const addCouponVal = Joi.object({
   code: generalField.name.trim().max(8).min(1).required(),
   discount: generalField.count.min(1).required(),
   fromDate: generalField.expires.required(),
-  toDate: Joi.date(),
-  //.greater(Joi.ref("fromDate")).required(),
+  toDate: Joi.date().greater(Joi.ref("fromDate")).required(),
   isFixed: Joi.boolean().optional(),
   isPercentage: Joi.boolean().optional(),
-  // users: Joi.array().items(
-  //   Joi.object({
-  //     user: generalField.id.required(),
-  //     maxUsage: generalField.count.min(1).required(),
-  //   })
-  // ),
+  users: Joi.array().items(
+    Joi.object({
+      userId: generalField.id.required(),
+      maxUsage: generalField.count.min(1).required(),
+    })
+  ),
 }).required();
 
 const paramsIdVal = Joi.object({

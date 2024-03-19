@@ -11,16 +11,15 @@ import SubCategoryRouter from "./modules/subCategory/subCategory.routes.js";
 import userRouter from "./modules/user/user.routes.js";
 import wishListRouter from "./modules/wishList/wishList.routes.js";
 import { globalError } from "./middlewares/globalError.js";
-
-import { createHandler } from "graphql-http/lib/use/express";
+import { createHandler } from 'graphql-http/lib/use/express'
 import ducumentQL from "graphql-playground-middleware-express";
-import { schema } from "./modules/graphQL.js";
+import { schema } from "./modules/graphQL/graphQL.js";
 import { rollbackSavedDoc, rollbackUploadFile } from "./middlewares/rollback.js";
 // import { job } from "./utils/crons.js";
 const expressPlayground = ducumentQL.default;
 
 export const init = (app) => {
-  app.use("/graphql", createHandler({ schema: schema }));
+  app.use("/graphql", createHandler({ schema  } ));
   app.get("/gui", expressPlayground({ endpoint: "/graphql" }));
 
   app.use("/api/v1/categories", categoryRouter);

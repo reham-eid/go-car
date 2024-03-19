@@ -9,6 +9,7 @@ import generateUniqueString from "../../utils/generateUniqueString.js";
 const addProduct = asyncHandler(async (req, res, next) => {
   const { title, description, price, discount, quantity, specefication } =
     req.body;
+    console.log("spec",specefication);
   const { categoryId, subCategoryId, brandId } = req.query;
   // check brands
   const brand = await Brand.findById(brandId);
@@ -29,7 +30,7 @@ const addProduct = asyncHandler(async (req, res, next) => {
   //calc total price of product or hook pre save
   const priceAfterDiscount = Number.parseInt(
     price - (price * discount || 0) / 100
-  ); //اشوفها بالفيرجوال
+  );  
   // check files
   if (!req.files)
     return next(new Error("please add imgs for your product", { cause: 400 }));
@@ -57,11 +58,10 @@ const addProduct = asyncHandler(async (req, res, next) => {
       folder: folder + `${brand.folderId}` + `/product/${uniqueId}`,
     }
   );
-
+//rollbck
   req.folder = folder + `${brand.folderId}` + `/product/${uniqueId}`;
 
-  //creatr product
-  const product = await Product.create({
+  const newProduct={
     ...req.body,
     categoryId,
     subCategoryId,
@@ -69,11 +69,14 @@ const addProduct = asyncHandler(async (req, res, next) => {
     cloudFolder: uniqueId,
     createdBy: req.user._id,
     slug: slugify(req.body.title, { lower: true, replacement: "-" }),
-    specefication: JSON.parse(specefication), //convert it to object
+    specefication: JSON.parse(specefication), //convert it to object  
     priceAfterDiscount,
     images: imgs,
     imgCover: { id: public_id, url: secure_url },
-  });
+  }
+  //creatr product
+  const product = await Product.create(newProduct);
+  //rollback
   req.savedDocument = { model: Product, condition: product._id };
 
   res.status(201).json({ message: "Product added successfuly", product });

@@ -31,11 +31,11 @@ const CouponSchema = new Schema(
       type: Date,
       required:true,
     },
-    status:{
+    couponStatus:{
       type:String,
       enum:['expired' , 'valid'],
       default:'valid'
-    },
+    }, // change to couponStatus 
     createdBy: {
       type: Types.ObjectId,
       ref: "user",

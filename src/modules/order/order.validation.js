@@ -1,17 +1,29 @@
 import Joi from "joi";
 import generalField from "../../utils/generalFields.js";
+import { payStatus } from "../../utils/system.roles.js";
 
 const addOrderVal = Joi.object({
-  cartId:generalField.id.required(),
+  id: generalField.id.required(),
 
-  address:generalField.address.required(),
-  payment:generalField.name.valid("cash", "visa")
+  quantity: generalField.count.required(),
+  street:generalField.name.required(),
+  city:generalField.name.required(),
+  couponCode:generalField.name.optional(),
+  phoneNumbers:Joi.array().items(generalField.phone).required(),
+  payment: generalField.name.valid(...Object.values(payStatus)),
+});
+const addFastOrderVal = Joi.object({
+  productId: generalField.id.required(),
+  quantity: generalField.count.required(),
+  street:generalField.name.required(),
+  city:generalField.name.required(),
+  couponCode:generalField.name.optional(),
+  phoneNumbers:Joi.array().items(generalField.phone).required(),
+  payment: generalField.name.valid(...Object.values(payStatus)),
 });
 
 const paramsIdVal = Joi.object({
-  id:generalField.id.required(),
-
-  address:generalField.address.required(),
+  orderId: generalField.id.required(),
 });
 
 const updateOrderVal = Joi.object({
@@ -21,4 +33,4 @@ const updateOrderVal = Joi.object({
   image: generalField.file.optional(),
 });
 
-export { addOrderVal, paramsIdVal, updateOrderVal };
+export { addOrderVal, paramsIdVal, updateOrderVal, addFastOrderVal };

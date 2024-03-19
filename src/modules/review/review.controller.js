@@ -4,6 +4,7 @@ import { ApiFeature } from "../../utils/ApiFeature.js";
 import Review from "../../../DB/models/review.model.js";
 import Order from "../../../DB/models/order.model.js";
 import Product from "../../../DB/models/product.model.js";
+import { calcReviewAvgRate } from "./review.service.js";
 
 const addReview = asyncHandler(async (req, res, next) => {
   const { productId } = req.params;
@@ -11,16 +12,17 @@ const addReview = asyncHandler(async (req, res, next) => {
   //check if user made order for this productId
   const isOrder = await Order.findOne({
     user: req.user._id,
-    status: "delivered",
+    statusOfOrder: "delivered",
     "cart.productId": productId,
   });
-  if (!isOrder)
+  if (!isOrder) {
     return next(
       new Error(
         `Cant review product with id: ${productId} , if you not order it first! `,
         { cause: 400 }
       )
     );
+  }
   // check past review (one review per product)
   if (
     await Review.findOne({
@@ -52,17 +54,11 @@ const addReview = asyncHandler(async (req, res, next) => {
   req.savedDocument = { model: Review, condition: review._id };
 
   //calculate avrage rate in Product model
-  const calcAvg = 0;
-  const product = await Product.findById(productId);
-  const reviews = await Review.find({ productId });
-
-  for (let i = 0; i < reviews.length; i++) {
-    calcAvg += reviews[i].rate;
-  }
-  product.rateAvg = calcAvg / reviews.length;
-  await product.save();
+  const product = await calcReviewAvgRate(productId);
   //send res
-  res.status(201).json({ message: "Review added successfuly", review });
+  res
+    .status(201)
+    .json({ message: "Review added successfuly", review, product });
 });
 
 const allReviews = asyncHandler(async (req, res) => {
@@ -76,9 +72,9 @@ const allReviews = asyncHandler(async (req, res) => {
 });
 
 const OneReview = asyncHandler(async (req, res, next) => {
-  const Review = await Review.findById(req.params.id).lean();
-  if (!Review) return next(new Error("Review Not found", { cause: 404 }));
-  res.status(200).json({ message: "Review of this Id:", Review });
+  const review = await Review.findById(req.params.id).lean();
+  if (!review) return next(new Error("Review Not found", { cause: 404 }));
+  res.status(200).json({ message: "Review of this Id:", review });
 });
 
 const updateReview = asyncHandler(async (req, res, next) => {

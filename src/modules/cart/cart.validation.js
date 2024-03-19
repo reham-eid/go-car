@@ -18,4 +18,4 @@ const updateQuantity = Joi.object({
   quantity:generalField.count.options({convert:false}).required()
 });
 
-export { addToCartVal, paramsIdVal, updateQuantity ,applyCouponVal};
+export { addToCartVal, paramsIdVal, updateQuantity };

@@ -7,7 +7,7 @@ code: {
     ref: "coupon",
     required: true,
 },
-user: {
+userId: {
     type: Types.ObjectId,
     ref: "User",
     required: true,

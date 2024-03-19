@@ -1,8 +1,8 @@
 import { Cart } from "../../../DB/models/cart.model.js";
 import Product from "../../../DB/models/product.model.js";
 import { asyncHandler } from "../../middlewares/asyncHandler.js";
-import { pricCalc } from "./services/calcPrice.js";
-import { createCart } from "./services/create.cart.js";
+import { pricCalc } from "./services/calcPrice.service.js";
+import { createCart } from "./services/create.cart.service.js";
 
 const addCart = asyncHandler(async (req, res, next) => {
   const { productId, quantity } = req.body;
@@ -22,7 +22,7 @@ const addCart = asyncHandler(async (req, res, next) => {
 
   //if not exisit {create cart with first product}
   if (!isCart) {
-    const cart = createCart(req.user._id, product, productId, quantity);
+    const cart = await createCart(req.user._id, product, productId, quantity);
     // rollback middleware
     req.savedDocument = { model: Cart, condition: cart._id };
     res.status(201).json({ message: "added to cart successfully ", cart });
@@ -34,7 +34,7 @@ const addCart = asyncHandler(async (req, res, next) => {
     //then add quantity in one product
     if (item) {
       //check quantity in db مع كل مره بيزود
-      if (item.quantity >= product.quantity)
+      if (item.quantity > product.quantity)
         return next(new Error("product sold out"));
       item.quantity += quantity || 1;
       item.finalPrice += item.price * quantity;
@@ -68,26 +68,11 @@ const removeItemFromCart = asyncHandler(async (req, res, next) => {
   // check productId if exisit or not
   const product = await Product.findById(req.params.id);
   if (!product) return next(new Error("product not found", { cause: 404 }));
-  //  const cart = await Cart.aggregate([
-  //     {
-  //       $match: { "user": new Types.ObjectId(req.user._id) },
-  //     },
-  //     {
-  //       $unwind: "$cartItems",
-  //     },
-  //     {
-  //       $match: { "cartItems.productId": req.params.id}
-  //     },
-  //     ,
-  //     {
-  //       $project:{'cartItems.productId' : 1}
-  //     }
-  //   ]);
+
   const cart = await Cart.findOne({
     user: req.user._id,
     "cartItems.productId": req.params.id,
   });
-  console.log(cart);
   if (!cart) {
     return res
       .status(404)
@@ -103,9 +88,8 @@ const removeItemFromCart = asyncHandler(async (req, res, next) => {
   cart.cartItems = cart.cartItems.filter((item) => {
     item.productId.toString() !== req.params.id;
   });
-  console.log(cart.cartItems);
   await pricCalc(cart); // reCalc
-  res.status(200).json({ message: "product deleted from cart updated", cart });
+  res.status(200).json({ message: "product deleted from cart ", cart });
 });
 
 const updateQuantity = asyncHandler(async (req, res, next) => {

@@ -1,7 +1,7 @@
 import { customAlphabet } from "nanoid";
 
 const generateUniqueString = (length) => {
-  const nanoid = customAlphabet("0123456789абвгдеё", length || 10);
+  const nanoid = customAlphabet("0123456789а", length || 10);
   return nanoid()
 };
 

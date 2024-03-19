@@ -7,6 +7,7 @@ import {
 } from "../../services/fileUploads/multer.js";
 import * as JoiVal from "./review.validation.js";
 import { allowTo, protectedRoute } from "../../middlewares/auth.js";
+import { status } from "../../utils/system.roles.js";
 
 const reviewRouter = Router({ mergeParams: true });
 
@@ -14,7 +15,7 @@ reviewRouter
   .route("/")
   .post(
     protectedRoute,
-    allowTo("user"),
+    allowTo(status.user),
     uploadFiles("img"),
     validation(JoiVal.addReviewVal),
     ReviewController.addReview
@@ -26,14 +27,14 @@ reviewRouter
   .get(validation(JoiVal.paramsIdVal), ReviewController.OneReview)
   .put(
     protectedRoute,
-    allowTo("user"),
+    allowTo(status.user),
     uploadSingleFile("img"),
     validation(JoiVal.updateReviewVal),
     ReviewController.updateReview
   )
   .delete(
     protectedRoute,
-    allowTo("user", "admin"),
+    allowTo(status.user, status.admin),
     validation(JoiVal.paramsIdVal),
     ReviewController.deleteReview
   );

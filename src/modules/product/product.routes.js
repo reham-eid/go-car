@@ -5,17 +5,26 @@ import * as JoiVal from "./product.validation.js";
 import { uploadFiles } from "../../services/fileUploads/multer.js";
 import reviewRouter from "../review/review.routes.js";
 import { allowTo, protectedRoute } from "../../middlewares/auth.js";
+import { createHandler } from "graphql-http/lib/use/express";
+import ducumentQL from "graphql-playground-middleware-express";
+import { systemRoles } from "../../utils/system.roles.js";
+const expressPlayground = ducumentQL.default;
 
 const productRouter = Router();
 
+
+// productRouter.use("/graphql-product", createHandler({ schema: productSchema }));
+// productRouter.get("/product-gui", expressPlayground({ endpoint: "/graphql-product" }));
+
 //Merge param
 productRouter.use("/:productId/reviews",reviewRouter);
+
 
 productRouter
   .route("/")
   .post(
     protectedRoute,
-    allowTo("admin"),
+    allowTo(systemRoles.admin),
     uploadFiles([
       // req.files >> object
       { name: "imgCover", maxCount: 1 }, // array
@@ -31,7 +40,7 @@ productRouter
   .get(validation(JoiVal.paramsIdVal), ProductController.OneProduct)
   .put(
     protectedRoute,
-    allowTo("admin"),
+    allowTo(systemRoles.admin),
     uploadFiles([
       { name: "imgCover", maxCount: 1 },
       { name: "images", maxCount: 10 },
@@ -41,7 +50,7 @@ productRouter
   )
   .delete(
     protectedRoute,
-    allowTo("admin"),
+    allowTo(systemRoles.admin),
     validation(JoiVal.paramsIdVal),
     ProductController.deleteProduct
   );

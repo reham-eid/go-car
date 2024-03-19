@@ -4,14 +4,15 @@ import { validation } from "../../middlewares/validation.middleware.js";
 import * as JoiVal from "./subCategory.validation.js";
 import { uploadSingleFile } from "../../services/fileUploads/multer.js";
 import { allowTo, protectedRoute } from "../../middlewares/auth.js";
+import { status } from "../../utils/system.roles.js";
 
 const SubCategoryRouter = Router({mergeParams:true});
+
+SubCategoryRouter.use(protectedRoute, allowTo(status.admin));
 
 SubCategoryRouter
   .route("/")
   .post(
-    protectedRoute,
-    allowTo('admin'),
     uploadSingleFile("img-Subcategory"),
     validation(JoiVal.addSubCategoryVal),
     SubCategoryController.addSubCategory
@@ -22,15 +23,11 @@ SubCategoryRouter
   .route("/:id")
   .get(validation(JoiVal.paramsIdVal), SubCategoryController.OneSubCategory)
   .put(
-    protectedRoute,
-    allowTo('admin'),
     uploadSingleFile("img-Subcategory"),
     validation(JoiVal.updateSubCategoryVal),
     SubCategoryController.updateSubCategory
   )
   .delete(
-    protectedRoute,
-    allowTo('admin'),
     validation(JoiVal.paramsIdVal),
     SubCategoryController.deleteSubCategory
   );
