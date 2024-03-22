@@ -11,8 +11,8 @@ function createInvoice(invoice, pathVar) {
   generateFooter(doc);
 
   doc.end();
-  console.log(path.resolve(`./files/${pathVar}`));
-  doc.pipe(fs.createWriteStream(path.resolve(`./files/${pathVar}`)));
+  console.log("URL>> ",path.resolve(`/src\/services\/trmpInvoices/files/${pathVar}`));
+  doc.pipe(fs.createWriteStream(path.resolve(`/src\/services\/trmpInvoices/files/${pathVar}`)));
 }
 function generateHeader(doc) {
   doc

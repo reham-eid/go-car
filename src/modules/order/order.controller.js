@@ -179,39 +179,39 @@ const createCashOrderFromCart = asyncHandler(async (req, res, next) => {
     );
   }
   //create invoice
-  // const orderCode = `${req.user.username}_${generateUniqueString(3)}`;
-  // console.log(orderCode);
-  // const invoice = {
-  //   shipping: {
-  //     name: req.user.username,
-  //     address: order.shippingAddress.street,
-  //     country: order.shippingAddress.city,
-  //   },
-  //   items: order.cart.map(({ name, description, quantity, price }) => ({
-  //     item: name,
-  //     description: description,
-  //     quantity: quantity,
-  //     amount: price,
-  //   })),
-  //   subtotal: order.totalOrderPrice, //before discount
-  //   paid: order.totalOrderPriceAfterDiscount, //after discount
-  //   invoice_nr: order._id,
-  // };
-  // const newInvoice = createInvoice(invoice, `${orderCode}.pdf`); //
-  // //send invoice at email
-  // const isEmail = await sendEmail({
-  //   to: req.user.email,
-  //   subject: "confirm your order...",
-  //   html: `<h1>please find your pdf invoice below...</h1>`,
-  //   attatchments: [
-  //     {
-  //       path: `../../services/trmpInvoices/files/${orderCode}.pdf`,
-  //     },
-  //   ],
-  // });
-  // if (!isEmail) {
-  //   return next(new Error("Email Confirmatiom is not send", { cause: 500 }));
-  // }
+  const orderCode = `${req.user.username}_${generateUniqueString(3)}`;
+  console.log(orderCode);
+  const invoice = {
+    shipping: {
+      name: req.user.username,
+      address: order.shippingAddress.street,
+      country: order.shippingAddress.city,
+    },
+    items: order.cart.map(({ name, description, quantity, price }) => ({
+      item: name,
+      description: description,
+      quantity: quantity,
+      amount: price,
+    })),
+    subtotal: order.totalOrderPrice, //before discount
+    paid: order.totalOrderPriceAfterDiscount, //after discount
+    invoice_nr: order._id,
+  };
+  const newInvoice = createInvoice(invoice, `${orderCode}.pdf`); //
+  //send invoice at email
+  const isEmail = await sendEmail({
+    to: req.user.email,
+    subject: "confirm your order...",
+    html: `<h1>please find your pdf invoice below...</h1>`,
+    attatchments: [
+      {
+        path: `../../services/trmpInvoices/files/${orderCode}.pdf`,
+      },
+    ],
+  });
+  if (!isEmail) {
+    return next(new Error("Email Confirmatiom is not send", { cause: 500 }));
+  }
   // clear cart
   // await Cart.findOneAndDelete({ user: req.user._id });
   // send res
