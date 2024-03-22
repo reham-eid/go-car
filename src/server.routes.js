@@ -24,13 +24,17 @@ import wishListRouter from "./modules/wishList/wishList.routes.js";
 const expressPlayground = ducumentQL.default;
 
 export const init = (app, express) => {
+
   app.use((req, res, next) => {
+    console.log("req",req.originalUrl);
     if (req.originalUrl === "/api/v1/orders/webhook") {
+      console.log("re");
       return next();
     }
     express.json()(req, res, next);
+    console.log("hhaam");
   });
-  app.use(express.urlencoded({ extended: true }));
+  // app.use(express.urlencoded({ extended: true }));
 
   app.use("/graphql", createHandler({ schema }));
   app.get("/gui", expressPlayground({ endpoint: "/graphql" }));

@@ -9,7 +9,7 @@ const signUpVal = Joi.object({
   age: generalField.age,
   role: generalField.role,
   phone: Joi.string().pattern(
-    new RegExp("^[+]?[(]?[0-9]{3}[)]?[-s.]?[0-9]{3}[-s.]?[0-9]{4,6}$")
+    new RegExp("^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$")
   ),
 }).required();
 

@@ -2,7 +2,6 @@ import { asyncHandler } from "../../middlewares/asyncHandler.js";
 import { Cart } from "../../../DB/models/cart.model.js";
 import Order from "../../../DB/models/order.model.js";
 import Product from "../../../DB/models/product.model.js";
-import User from "../../../DB/models/user.model.js";
 import createInvoice from "../../services/trmpInvoices/pdfInvoice.js";
 import { ApiFeature } from "../../utils/ApiFeature.js";
 import { CouponValidation } from "../coupon/service/coupon.service.js";
@@ -16,6 +15,8 @@ import {
   createPaymentIntent,
   refundPaymentIntent,
 } from "../../payment-handler/stripe.js";
+import generateUniqueString from "../../utils/generateUniqueString.js";
+import { sendEmail } from "../../services/emails/sendEmail.js";
 
 const createOrder = asyncHandler(async (req, res, next) => {
   const {
@@ -177,27 +178,40 @@ const createCashOrderFromCart = asyncHandler(async (req, res, next) => {
       { $inc: { maxUsage: 1 } }
     );
   }
-  // //create invoice
+  //create invoice
+  // const orderCode = `${req.user.username}_${generateUniqueString(3)}`;
+  // console.log(orderCode);
   // const invoice = {
   //   shipping: {
-  //     name: req.user.name,
-  //     address: req.body.address,
-  //     country: "Cairo",
+  //     name: req.user.username,
+  //     address: order.shippingAddress.street,
+  //     country: order.shippingAddress.city,
   //   },
-  //   items: order.cart.map(
-  //     ({ productId: { title, description }, quantity }) => ({
-  //       item: title,
-  //       description: description,
-  //       quantity: quantity,
-  //       amount: totalOrderPrice,
-  //     })
-  //   ),
-
-  //   subtotal: cart.totalPrice, //before discount
-  //   paid: order.totalOrderPrice, //after discount
+  //   items: order.cart.map(({ name, description, quantity, price }) => ({
+  //     item: name,
+  //     description: description,
+  //     quantity: quantity,
+  //     amount: price,
+  //   })),
+  //   subtotal: order.totalOrderPrice, //before discount
+  //   paid: order.totalOrderPriceAfterDiscount, //after discount
   //   invoice_nr: order._id,
   // };
-  // createInvoice(invoice, "invoice.pdf");
+  // const newInvoice = createInvoice(invoice, `${orderCode}.pdf`); //
+  // //send invoice at email
+  // const isEmail = await sendEmail({
+  //   to: req.user.email,
+  //   subject: "confirm your order...",
+  //   html: `<h1>please find your pdf invoice below...</h1>`,
+  //   attatchments: [
+  //     {
+  //       path: `../../services/trmpInvoices/files/${orderCode}.pdf`,
+  //     },
+  //   ],
+  // });
+  // if (!isEmail) {
+  //   return next(new Error("Email Confirmatiom is not send", { cause: 500 }));
+  // }
   // clear cart
   // await Cart.findOneAndDelete({ user: req.user._id });
   // send res

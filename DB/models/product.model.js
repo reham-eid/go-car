@@ -37,10 +37,10 @@ const productSchema = new Schema(
       unique: true,
       required: true,
     },
-    specefication: { //color size
-      type: Map,
-      of: [String | Number],
-    },
+    // specefication: { //color size
+    //   // type: Map,
+    //   // of: [String | Number],
+    // },
     price: {
       type: Number,
       required: true,

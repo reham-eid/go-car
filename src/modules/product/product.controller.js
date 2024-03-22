@@ -7,9 +7,8 @@ import cloudinary from "../../services/fileUploads/cloudinary.js";
 import generateUniqueString from "../../utils/generateUniqueString.js";
 
 const addProduct = asyncHandler(async (req, res, next) => {
-  const { title, description, price, discount, quantity, specefication } =
+  const { title, description, price, discount, quantity } =
     req.body;
-    console.log("spec",specefication);
   const { categoryId, subCategoryId, brandId } = req.query;
   // check brands
   const brand = await Brand.findById(brandId);
@@ -69,7 +68,7 @@ const addProduct = asyncHandler(async (req, res, next) => {
     cloudFolder: uniqueId,
     createdBy: req.user._id,
     slug: slugify(req.body.title, { lower: true, replacement: "-" }),
-    specefication: JSON.parse(specefication), //convert it to object  
+    // specefication: JSON.parse(specefication), //convert it to object  
     priceAfterDiscount,
     images: imgs,
     imgCover: { id: public_id, url: secure_url },
@@ -100,7 +99,7 @@ const OneProduct = asyncHandler(async (req, res) => {
 });
 
 const updateProduct = asyncHandler(async (req, res) => {
-  const { title, description, price, discount, quantity, specefication ,oldImgsIDs,oldimgCoverID} =
+  const { title, description, price, discount, quantity ,oldImgsIDs,oldimgCoverID} =
     req.body;
   const { id } = req.params;
   //check product
@@ -168,7 +167,7 @@ const updateProduct = asyncHandler(async (req, res) => {
   const product = await Product.findByIdAndUpdate(isProduct._id, {
     ...req.body,
     slug: slugify(title, { lower: true, replacement: "-" }),
-    specefication: JSON.parse(specefication), //convert it to object
+    // specefication: JSON.parse(specefication), //convert it to object
     priceAfterDiscount
   });
 

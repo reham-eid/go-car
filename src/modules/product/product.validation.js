@@ -1,21 +1,19 @@
 import Joi from "joi";
 import generalField from "../../utils/generalFields.js";
 
-const val = (value, helper) => {
-  // console.log("dfs");
-  // console.log(value);
-  // console.log(typeof value)
-  const filterObj = JSON.stringify(value);
-// console.log("filterObj",filterObj);
-  const spes = JSON.parse(filterObj)
-  console.log(typeof spes);
-  console.log("spes",spes);
-for (const key in spes) {
-    console.log("ele",key);
-    
-  
-}
-};
+// const val = (value, helper) => {
+//   // console.log("dfs");
+//   // console.log(value);
+//   // console.log(typeof value)
+//   const filterObj = JSON.stringify(value);
+// // console.log("filterObj",filterObj);
+//   const spes = JSON.parse(filterObj)
+//   console.log(typeof spes);
+//   console.log("spes",spes);
+// for (const key in spes) {
+//     console.log("ele",key);
+// }
+// };
 const addProductVal = Joi.object({
   title: generalField.name.min(2).max(50).required(),
   description: generalField.name.min(10).max(100).required(),
@@ -25,7 +23,7 @@ const addProductVal = Joi.object({
     .min(1)
     .rule({ message: " *quantity* must at least one" })
     .optional(),
-  specefication: Joi.custom(val),
+  // specefication: Joi.custom(val),
   createdBy: generalField.id.optional(),
   categoryId: generalField.id,//
   subCategoryId: generalField.id,//

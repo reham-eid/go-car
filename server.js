@@ -14,7 +14,7 @@ await connectDB();
 if (process.env.NODE_ENV == "development") {
   app.use(morgan("dev"));
 }
-app.use(cors());
+// app.use(cors());
 // API routes
 init(app,express);
 

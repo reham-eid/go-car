@@ -84,6 +84,7 @@ userSchema.pre("findOneAndUpdate", function (next) {
       +process.env.SALT
     );
   }
+  next()
 });
 
 const User = model("user", userSchema);

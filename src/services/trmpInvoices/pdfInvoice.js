@@ -1,7 +1,8 @@
 import fs from "fs";
+import path from 'path'
 import PDFDocument from "pdfkit";
 
-function createInvoice(invoice, path) {
+function createInvoice(invoice, pathVar) {
   let doc = new PDFDocument({ size: "A4", margin: 50 });
 
   generateHeader(doc);
@@ -10,9 +11,9 @@ function createInvoice(invoice, path) {
   generateFooter(doc);
 
   doc.end();
-  doc.pipe(fs.createWriteStream(path));
+  console.log(path.resolve(`./files/${pathVar}`));
+  doc.pipe(fs.createWriteStream(path.resolve(`./files/${pathVar}`)));
 }
-
 function generateHeader(doc) {
   doc
     // .image("logo.png", 50, 45, { width: 50 })
@@ -78,7 +79,6 @@ function generateInvoiceTable(doc, invoice) {
   for (i = 0; i < invoice.items.length; i++) {
     const item = invoice.items[i];
     const position = invoiceTableTop + (i + 1) * 30;
-    console.log(item.title)
     generateTableRow(
       doc,
       position,

@@ -2,8 +2,6 @@ import { Router } from "express";
 import { validation } from "../../middlewares/validation.middleware.js";
 import * as authValidation from "./auth.validation.js";
 import * as authController from "./auth.controller.js";
-import { allowTo, protectedRoute } from "../../middlewares/auth.js";
-import { systemRoles } from "../../utils/system.roles.js";
 
 const authRouter = Router();
 
@@ -15,7 +13,7 @@ authRouter
     authController.activeAccount
   )
   .post("/login", validation(authValidation.loginVal), authController.logIn)
-  .post("/login-with-google", validation(authValidation.logInWithGoogleVal), authController.logInWithGoogle)
+  // .post("/login-with-google", validation(authValidation.logInWithGoogleVal), authController.logInWithGoogle)
 
   .patch(
     "/forget-password",

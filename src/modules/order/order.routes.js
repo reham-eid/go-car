@@ -10,7 +10,7 @@ const orderRouter = Router();
 orderRouter.post(
   "/webhook",
   express.raw({ type: "application/json" }), // req.body>>buffer data
-  OrderController.stripeWebhookLocal
+  OrderController.stripeWebhook //stripeWebhookLocal
 ); //stripe
 
 orderRouter
