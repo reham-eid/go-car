@@ -1,0 +1,1 @@
+24/03/2024, 5:43:07 am | INFO | Invoice>>>  | data {"shipping":{"name":"rana-eid","address":"maadi st 9","country":"cairo"},"items":[{"item":"airbod","description":"model 2024","quantity":2,"amount":20000}],"subtotal":40000,"paid":20000,"invoice_nr":"65ff933bc6ed787ea6ae4441"} | 

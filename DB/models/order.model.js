@@ -1,6 +1,5 @@
 import { Schema, Types, model } from "mongoose";
 import { orderStatus, payStatus } from "../../src/utils/system.roles.js";
-import mongoose from "mongoose";
 
 const orderSchema = new Schema(
   {

@@ -17,6 +17,9 @@ import {
 } from "../../payment-handler/stripe.js";
 import generateUniqueString from "../../utils/generateUniqueString.js";
 import { sendEmail } from "../../services/emails/sendEmail.js";
+import {LoggerService} from "../../services/logger/logger.service.js";
+
+const logger = new LoggerService('order.controller')
 
 const createOrder = asyncHandler(async (req, res, next) => {
   const {
@@ -180,7 +183,6 @@ const createCashOrderFromCart = asyncHandler(async (req, res, next) => {
   }
   //create invoice
   const orderCode = `${req.user.username}_${generateUniqueString(3)}`;
-  console.log(orderCode);
   const invoice = {
     shipping: {
       name: req.user.username,
@@ -197,6 +199,7 @@ const createCashOrderFromCart = asyncHandler(async (req, res, next) => {
     paid: order.totalOrderPriceAfterDiscount, //after discount
     invoice_nr: order._id,
   };
+  logger.info("Invoice>>> " , invoice)
   const newInvoice = createInvoice(invoice, `${orderCode}.pdf`); //
   //send invoice at email
   const isEmail = await sendEmail({
@@ -305,7 +308,7 @@ const payWithStripe = asyncHandler(async (req, res, next) => {
 
 const stripeWebhookLocal = asyncHandler(async (req, res, next) => {
   const orderId = req.body.data.object.metadata.OrderId;
-  console.log("webhook :  ", req.body.data.object.metadata.OrderId);
+  // console.log("webhook :  ", req.body.data.object.metadata.OrderId);
 
   const confirmOrder = await Order.findById(orderId);
   if (!confirmOrder) {
@@ -323,6 +326,7 @@ const stripeWebhookLocal = asyncHandler(async (req, res, next) => {
   await confirmOrder.save();
   res.status(200).json({ message: "webhook received" });
 });
+
 const stripeWebhook = asyncHandler(async (req, res) => {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;

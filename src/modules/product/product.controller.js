@@ -22,7 +22,7 @@ const addProduct = asyncHandler(async (req, res, next) => {
   if (brand.createdBy.toString() !== req.user._id.toString()) {
     return next(
       new Error("you are not allowed to add product to this brand", {
-        cause: 404,
+        cause: 403,
       })
     );
   }

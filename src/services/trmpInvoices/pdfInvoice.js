@@ -1,5 +1,5 @@
 import fs from "fs";
-import path from 'path'
+import path from "path";
 import PDFDocument from "pdfkit";
 
 function createInvoice(invoice, pathVar) {
@@ -11,8 +11,15 @@ function createInvoice(invoice, pathVar) {
   generateFooter(doc);
 
   doc.end();
-  console.log("URL>> ",path.resolve(`/src\/services\/trmpInvoices/files/${pathVar}`));
-  doc.pipe(fs.createWriteStream(path.resolve(`/src\/services\/trmpInvoices/files/${pathVar}`)));
+  // console.log(
+  //   "Inoive>> ",
+  //   path.resolve( `src/services/trmpInvoices/files/${pathVar}`)
+  // );
+  doc.pipe(
+    fs.createWriteStream(
+      path.resolve(`src/services/trmpInvoices/files/${pathVar}`)
+    )
+  );
 }
 function generateHeader(doc) {
   doc

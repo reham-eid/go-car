@@ -59,16 +59,13 @@ const activeAccount = asyncHandler(async (req, res, next) => {
       })
     );
   }
-  console.log("d5alnaaa");
   //update isEmailConfirm
-  console.log({email});
   const user = await User.findOneAndUpdate(
     { email, isEmailConfirm: false },
     { isEmailConfirm: true },
     { new: true }
   );
-  console.log(user);
-  console.log("d5alnaaa22");
+
   if (!user) return next(new Error("user Not found", { cause: 404 }));
   //send res
   res.status(200).json({ message: "acctivate your account successfuly", user });
@@ -99,7 +96,7 @@ const logIn = asyncHandler(async (req, res, next) => {
   user.token = token;
   await user.save();
   //send res
-  res.status(200).json({ message: "log in successfuly", AccsessToken: token });
+  res.status(200).json({ message: "logIn successfuly", AccsessToken: token });
 });
 
 // const signupWithGoogle = asyncHandler(async (req, res, next) => {
