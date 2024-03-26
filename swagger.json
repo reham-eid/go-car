@@ -1,9 +1,9 @@
 {
-    "swagger": "3.0.3",
+    "swagger": "2.0",
     "info": {
       "title": "Ecommerce API",
       "description": "An API for ecommerce works built using NodeJS & MongoDB",
-      "version": "3.1.0",
+      "version": "1.0.0",
       "contact": {
         "name": "Mahmoud Yasser",
         "email": "mle.mahmoud.yasser@gmail.com",

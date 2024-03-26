@@ -67,7 +67,7 @@ const getAllBrand = asyncHandler(async (req, res) => {
     .sort()
     .pagination({size:2})
     .filter()
-    .search();
+    .search(['name']);
   const brand = await apiFeature.mongoQuery;//.lean()
   res.status(200).json({ message: "All Brand", brand });
 });

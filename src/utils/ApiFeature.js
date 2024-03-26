@@ -43,16 +43,18 @@ export class ApiFeature {
     return this;
   }
 
-  search() {
+  search(by = ['title','description','name']) {
     if (this.query?.keyword) {
       // search : tv >>(lgtv , toshipatv) // any thing that include keyword(tv)
+      let keyword = this.query?.keyword
+      const orConditions = by.map(feild=>({
+        [feild]: { $regex:  keyword, $options: "i" } 
+          
+      }))
       this.mongoQuery.find({
-        $or: [
-          { title: { $regex: this.query.keyword, $options: "i" } },
-          { description: { $regex: this.query.keyword, $options: "i" } },
-          { name: { $regex: this.query.keyword, $options: "i" } },
-        ],
+        $or: orConditions
       });
+
     }
     return this;
   }
