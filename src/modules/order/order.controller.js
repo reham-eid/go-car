@@ -199,7 +199,7 @@ const createCashOrderFromCart = asyncHandler(async (req, res, next) => {
     paid: order.totalOrderPriceAfterDiscount, //after discount
     invoice_nr: order._id,
   };
-  logger.info("Invoice>>> " , invoice)
+  // logger.info("Invoice>>> " , invoice)
   const newInvoice = createInvoice(invoice, `${orderCode}.pdf`); //
   //send invoice at email
   const isEmail = await sendEmail({

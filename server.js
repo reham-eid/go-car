@@ -26,5 +26,5 @@ const logger = new LoggerService("serverLogger");
 
 const port = 4001;
 app.listen(process.env.PORT || port, () => {
-  logger.error(`server is running..! `); //port can be string or number
+  console.log(`server is running..! `); //port can be string or number
 });
