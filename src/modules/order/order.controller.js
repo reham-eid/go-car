@@ -19,7 +19,7 @@ import generateUniqueString from "../../utils/generateUniqueString.js";
 import { sendEmail } from "../../services/emails/sendEmail.js";
 import {LoggerService} from "../../services/logger/logger.service.js";
 
-const logger = new LoggerService('order.controller')
+const logger = new LoggerService('orderLogger.controller')
 
 const createOrder = asyncHandler(async (req, res, next) => {
   const {

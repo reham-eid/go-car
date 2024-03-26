@@ -1,4 +1,4 @@
-import winston from "winston";
+import { createLogger, config, format, transports } from "winston";
 import path from "path";
 // date + LoggerLevel + message
 const dateFormate = () => {
@@ -6,9 +6,9 @@ const dateFormate = () => {
 };
 export class LoggerService {
   constructor(route) {
-    const logger = winston.createLogger({
-      levels: winston.config.syslog.levels,
-      format: winston.format.printf((info) => {
+    const logger = createLogger({
+      levels: config.syslog.levels,
+      format: format.printf((info) => {
         let message = `${dateFormate()} | ${info.level.toUpperCase()} | ${
           info.message
         } | `;
@@ -18,10 +18,16 @@ export class LoggerService {
         return message;
       }),
       transports: [
-        new winston.transports.Console({ level: "info" }),
-        new winston.transports.File({
-          filename: path.resolve(`src/services/logger/log/${route}.log`),
+        new transports.Console({
           level: "info",
+          format: format.combine(
+            format.prettyPrint()
+          ),
+        }),
+        new transports.File({
+          filename: path.resolve(`src/services/logger/log/${route}.log`),
+          level: "error",
+          format : format.errors({ stack: true }),
         }),
       ],
     });
@@ -38,13 +44,13 @@ export class LoggerService {
   async error(message) {
     this.logger.log("error", message);
   }
-  async error(message) {
+  async error(message,obj) {
     this.logger.log("error", message, { obj });
   }
   async debug(message) {
     this.logger.log("debug", message);
   }
-  async debug(message) {
+  async debug(message,obj) {
     this.logger.log("debug", message, { obj });
   }
 }

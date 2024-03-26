@@ -19,7 +19,8 @@ import reviewRouter from "./modules/review/review.routes.js";
 import SubCategoryRouter from "./modules/subCategory/subCategory.routes.js";
 import userRouter from "./modules/user/user.routes.js";
 import wishListRouter from "./modules/wishList/wishList.routes.js";
-
+import swaggerUi from "swagger-ui-express";
+import swaggerDocument from "../swagger.json" assert { type: "json" };
 // import { job } from "./utils/crons.js";
 const expressPlayground = ducumentQL.default;
 
@@ -27,7 +28,6 @@ export const init = (app, express) => {
 
   app.use((req, res, next) => {
     if (req.originalUrl === "/api/v1/orders/webhook") {
-      console.log("re");
       return next();
     }
     express.json()(req, res, next);
@@ -49,6 +49,9 @@ export const init = (app, express) => {
     app.use("/api/v1/coupons", couponRouter);
   app.use("/api/v1/carts", CartRouter),
     app.use("/api/v1/orders", orderRouter),
+
+    // swagger
+app.use("/swaggwer-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
     // Page Not Found
     app.use("*", (req, res, next) => {
       return next(
