@@ -61,7 +61,7 @@ const addBrand = asyncHandler(async (req, res, next) => {
   res.status(201).json({ message: "Brand added successfuly", brand });
 });
 
-const getAllBrand = asyncHandler(async (req, res) => {
+const getAllBrand = asyncHandler(async (req, res,next) => {
   let apiFeature = new ApiFeature(Brand.find({}), req.query)
     .fields()
     .sort()
@@ -69,6 +69,7 @@ const getAllBrand = asyncHandler(async (req, res) => {
     .filter()
     .search(['name']);
   const brand = await apiFeature.mongoQuery;//.lean()
+  req.brand=brand
   res.status(200).json({ message: "All Brand", brand });
 });
 

@@ -1,6 +1,7 @@
 import { Schema, Types, model } from "mongoose";
+import { auditMiddleware } from "../../src/middlewares/audit.service.js";
 
-const BrandSchema = new Schema(
+const brandSchema = new Schema(
   {
     name: {
       type: String,
@@ -27,17 +28,17 @@ const BrandSchema = new Schema(
       type: Types.ObjectId,
       ref: "user",
     },
-    subCategoryId:{
-      type:Types.ObjectId,
-      ref:"subCategory"
+    subCategoryId: {
+      type: Types.ObjectId,
+      ref: "subCategory",
     },
-    categoryId:{
-      type:Types.ObjectId,
-      ref:"category"
-    }
+    categoryId: {
+      type: Types.ObjectId,
+      ref: "category",
+    },
   },
   { timestamps: true, strictQuery: true } // filter only with this schema fields
 );
 
-const Brand = model("brand", BrandSchema);
+const Brand = model("brand", brandSchema);
 export default Brand;
