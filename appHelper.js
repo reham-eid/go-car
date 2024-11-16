@@ -43,11 +43,8 @@ const appUse = (app) => {
 
   // Handles requests for routes that do not exist
   app.all("*", (req, res, next) => {
-    buildError(
-      404,
-      "Not found",
-      "ops, this route does not exist,please read the documentation",
-      next
+    next(
+      new Error(`ops, this route ${req.originalUrl} does not exist,please read the documentation`, { cause: 404 })
     );
   });
 
