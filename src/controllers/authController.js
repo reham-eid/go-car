@@ -50,7 +50,7 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const { email, password , rememberMe } = req.body;
+    const { email, password, rememberMe } = req.body;
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -65,10 +65,14 @@ export const login = async (req, res) => {
     const expiresIn = rememberMe ? "30d" : "1h";
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
-      expiresIn
+      expiresIn,
     });
 
-    res.status(200).json({ message: "User login successfully", token ,expiresIn });
+    user.isEmailConfirm = true;
+    await user.save();
+    res
+      .status(200)
+      .json({ message: "User login successfully", token, expiresIn });
   } catch (error) {
     console.log("Error in login:", error);
     return res
@@ -78,7 +82,7 @@ export const login = async (req, res) => {
 };
 
 // Utility function to verify tokens based on provider
-const verifyToken = async (provider, token) => {
+const verifyTokenId = async (provider, token) => {
   switch (provider) {
     case "GOOGLE":
       return await verifyGoogleToken(token);
@@ -143,7 +147,7 @@ export const signupWithOAuth = async (req, res, next) => {
 
   try {
     // Step 1: Verify Token
-    const userData = await verifyToken(provider, token);
+    const userData = await verifyTokenId(provider, token);
 
     console.log("userData>> ", userData);
 
@@ -207,7 +211,7 @@ export const loginWithOAuth = async (req, res, next) => {
 
   try {
     // Step 1: Verify Token
-    const userData = await verifyToken(provider, token);
+    const userData = await verifyTokenId(provider, token);
 
     // Step 2: Check for required fields (Example: email verification for Google)
     if (provider === "GOOGLE" && userData.email_verified !== true) {

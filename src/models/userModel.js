@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
   userName: {
@@ -19,6 +19,14 @@ const userSchema = new mongoose.Schema({
   address: {
     type: String,
   },
+  isEmailConfirm: {
+    type: Boolean,
+    default: false,
+  },
+  changePassAt: Date,
+  forgetCode:{
+    type: String,
+  },
   phone: {
     type: Number,
     required: true,
@@ -30,10 +38,10 @@ const userSchema = new mongoose.Schema({
   token: String,
   provider: {
     type: String,
-    enum: [ "System","GOOGLE","GITHUB","FACEBOOK"],
+    enum: ["System", "GOOGLE", "GITHUB", "FACEBOOK"],
     default: "System",
   },
 });
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 export default User;

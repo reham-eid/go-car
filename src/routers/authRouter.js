@@ -8,12 +8,12 @@ import {
 import {
   registerValidation,
   loginValidation,
-} from "../middelware/validation.js";
+  resetPassValidation,
+  forgetPassValidation,
+} from "../validation/auth-validation.js";
 
-import { userAuth } from "../middelware/userMiddleware.js";
 import {
   requestPasswordReset,
-  verifyCode,
   resetPassword,
 } from "../controllers/forgetPassword.js";
 
@@ -39,12 +39,12 @@ router.post(
 router.post("/sign-up/with", signupWithOAuth);
 
 // request for reset password router
-router.post("/forget-password", userAuth, requestPasswordReset);
+router.post("/forget-password", forgetPassValidation, requestPasswordReset);
 
 // verify code router
-router.post("/verify-code", verifyCode);
+// router.post("/verify-code",forgetPassValidation, verifyCode);
 
 //reset new password router
-router.post("/reset-password", userAuth, loginValidation, resetPassword);
+router.post("/reset-password/", resetPassValidation, resetPassword);
 
 export { router as authRouter };

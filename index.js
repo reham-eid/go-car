@@ -1,6 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
-import appUse from "./appHelper.js";
+import appUse from "./src/appHelper.js";
 
 dotenv.config();
 
