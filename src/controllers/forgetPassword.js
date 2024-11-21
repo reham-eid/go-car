@@ -14,7 +14,7 @@ dotenv.config();
 // Nodemailer mailtrap setup
 const transporter = nodemailer.createTransport({
   host: process.env.E_HOST,
-  service: "gmail",
+  // service: "gmail",
   port: 587,
   auth: {
     user: process.env.E_USER,
