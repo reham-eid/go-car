@@ -15,6 +15,7 @@ import {
 import {
   requestPasswordReset,
   resetPassword,
+  verifyCode,
 } from "../controllers/forgetPassword.js";
 
 const router = express.Router();
@@ -42,7 +43,7 @@ router.post("/sign-up/with", signupWithOAuth);
 router.post("/forget-password", forgetPassValidation, requestPasswordReset);
 
 // verify code router
-// router.post("/verify-code",forgetPassValidation, verifyCode);
+router.post("/verify-code", verifyCode);
 
 //reset new password router
 router.post("/reset-password/", resetPassValidation, resetPassword);
