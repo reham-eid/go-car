@@ -1,8 +1,9 @@
 import Ride from "../models/rideModel.js";
 import Stripe from "stripe";
 
-const stripeInstance = Stripe(process.env.STRIPE_SECRETE_KEY);
-
+const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: '2022-11-15',
+});
 // Create a new ride
 export const createRide = async (req, res) => {
   try {

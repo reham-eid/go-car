@@ -1,7 +1,10 @@
 import express from 'express';
 import { createCar, getBrands, getRecommendedCars } from '../controllers/carController.js';
+import { protectedRoute } from '../middelware/auth.middelware.js';
 
 const router = express.Router();
+
+router.use(protectedRoute(["renter"]))
 
 router.post('/create-car', createCar);
 router.get('/brands', getBrands);
