@@ -60,23 +60,11 @@ export const requestPasswordReset = async (req, res) => {
     user.forgetCode = hashedForgetCode;
     await user.save();
 
-    // Generate email token (store plain forgetCode in the token)
-    const emailToken = generateToken({
-      payload: { email, forgetCode: hashedForgetCode }, // Store the plain forgetCode in the payload
-      expiresIn: "1h",
-    });
-
-    // Log the token for debugging
-    console.log("Generated emailToken:", emailToken);
-
-    // Create reset password link
-    const link = `${req.protocol}://${req.headers.host}/api/auth/reset-password/?emailToken=${emailToken}`;
-
     // Send email
     const isSent = await transporter.sendMail({
       to: email,
       subject: "Your Verification Code",
-      text: `Click to reset your password: ${link}`,
+      text: `To reset your password: ${forgetCode}`,
     });
 
     if (!isSent) {
@@ -95,32 +83,41 @@ export const requestPasswordReset = async (req, res) => {
   }
 };
 
+// verify code
+export const verifyCode = async (req, res) => {
+  const { email, code } = req.body;
+
+  try {
+    const verification = await User.findOne({ email });
+
+    if (!verification) {
+      return res
+        .status(400)
+        .json({ message: "No verification code found for this email" });
+    }
+
+    if (verification.forgetCode.toString() === code.toString()) {
+      res
+        .status(200)
+        .json({ message: "Verification code verified successfully" });
+    } else {
+      res.status(400).json({ message: "Invalid verification code" });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error verifying the code", error: error.message });
+    console.error(error);
+  }
+};
+
 export const resetPassword = asyncHandler(async (req, res, next) => {
   try {
     //get data from req
-    const { newPassword, confirmPassword } = req.body;
-    const { emailToken } = req.query;
-
-    let decoded;
-    try {
-      decoded = verifyToken({ token: emailToken });
-    } catch (err) {
-      if (err instanceof TokenExpiredError) {
-        return res.status(400).json({
-          message:
-            "The password reset token has expired. Please request a new one.",
-        });
-      }
-      return next(new Error("Invalid reset token", { cause: 400 }));
-    }
-
-    //find user by emailToken
-    const { email, forgetCode } = decoded;
-    console.log("forgetCode >> ", forgetCode);
+    const { newPassword, confirmPassword, email } = req.body;
 
     // check user
-    const user = await User.findOne({ email, forgetCode });
-    console.log("emailToken2", emailToken);
+    const user = await User.findOne({ email });
     // console.log("user>>>>>> ",user);
 
     if (!user) {
@@ -152,7 +149,7 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
     //send res
     res.status(200).json({
       message: "reset your Password successfuly , try to login now",
-      // resetPassword,
+      resetPassword,
     });
   } catch (err) {
     console.error("Error in reset Password :", err);

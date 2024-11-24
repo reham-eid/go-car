@@ -34,6 +34,8 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
+    enum: ["renter", "user"],
+    default: "user",
   },
   token: String,
   provider: {

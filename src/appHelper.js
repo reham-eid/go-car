@@ -5,6 +5,8 @@ import errorHandler from "./middelware/globalErrorHndler.js";
 import morgan from "morgan";
 import cors from "cors";
 import { authRouter } from "./routers/authRouter.js";
+import { rideRouter } from "./routers/rideRouter.js";
+import { carRouter } from "./routers/carRoutes.js";
 
 const appUse = (app) => {
   // Connect to MongoDB
@@ -40,6 +42,10 @@ const appUse = (app) => {
 
   // set app use
   app.use("/api/auth", authRouter);
+  app.use("/api/ride", rideRouter);
+
+  app.use("/api/car", carRouter);
+
 
   // Handles requests for routes that do not exist
   app.all("*", (req, res, next) => {

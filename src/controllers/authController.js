@@ -64,7 +64,7 @@ export const login = async (req, res) => {
 
     const expiresIn = rememberMe ? "30d" : "1h";
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
+    const token = jwt.sign({ userId: user._id , role: user.role }, process.env.JWT_SECRET_KEY, {
       expiresIn,
     });
 
