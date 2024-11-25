@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const carSchema = new mongoose.Schema(
   {
     brand: {
-      name: {
+      brandName: {
         type: String,
         required: true,
       },

@@ -3,9 +3,12 @@ import Car from "../models/carModel.js";
 // Get all brands
 export const createCar = async (req, res) => {
   try {
-    const { brand, model, rating, reviews, pricePerHour, imageUrl } = req.body;
+    const { brandName , logo, model, rating, reviews, pricePerHour, imageUrl } = req.body;
     const newCar = await Car.create({
-      brand,
+      brand:{
+        brandName,
+        logo
+      },
       model,
       rating,
       reviews,
