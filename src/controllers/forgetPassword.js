@@ -51,20 +51,20 @@ export const requestPasswordReset = async (req, res) => {
     console.log("Generated forgetCode (plain):", forgetCode);
 
     // Hash forgetCode for saving in DB
-    const hashedForgetCode = bcryptjs.hashSync(forgetCode, +process.env.SALT);
+    // const hashedForgetCode = bcryptjs.hashSync(forgetCode, +process.env.SALT);
 
     // Log the hashed forgetCode for verification
-    console.log("Hashed forgetCode:", hashedForgetCode);
+    // console.log("Hashed forgetCode:", hashedForgetCode);
 
     // Save hashed forgetCode to DB
-    user.forgetCode = hashedForgetCode;
+    user.forgetCode = forgetCode;
     await user.save();
 
     // Send email
     const isSent = await transporter.sendMail({
       to: email,
       subject: "Your Verification Code",
-      text: `To reset your password: ${forgetCode}`,
+      text: `To reset your password use this Code: ${forgetCode}`,
     });
 
     if (!isSent) {

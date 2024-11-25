@@ -4,9 +4,9 @@ import { protectedRoute } from '../middelware/auth.middelware.js';
 
 const router = express.Router();
 
-router.use(protectedRoute(["renter"]))
 
-router.post('/create-car', createCar);
+router.post('/create-car', protectedRoute(["renter"]) ,createCar);
+router.use(protectedRoute(["user"]))
 router.get('/brands', getBrands);
 router.get('/recommendations', getRecommendedCars);
 
