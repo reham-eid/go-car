@@ -4,7 +4,7 @@ import Stripe from "stripe";
 // console.log("Stripe API Key:", process.env.STRIPE_SECRET_KEY);
 
 const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2024-11-24",
+  apiVersion: "2023-08-16",
 });
 // Create a new ride
 export const createRide = async (req, res) => {

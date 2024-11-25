@@ -10,7 +10,10 @@ export const connectDB = async () => {
     await mongoose.connect(mongoUri, {
       // useNewUrlParser: true,
       // useUnifiedTopology: true,
+      ssl: true,
       tlsAllowInvalidCertificates: true,
+      connectTimeoutMS: 10000,  // 10 seconds timeout
+      serverSelectionTimeoutMS: 5000,  // 5 seconds timeout
     });
     console.log("Connected to MongoDB");
   } catch (err) {
