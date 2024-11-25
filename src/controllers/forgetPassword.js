@@ -4,10 +4,6 @@ import asyncHandler from "express-async-handler";
 import dotenv from "dotenv";
 import randomstring from "randomstring";
 import User from "../models/userModel.js";
-import {
-  generateToken,
-  verifyToken,
-} from "../middelware/GenerateAndVerifyToken.js";
 
 dotenv.config();
 
