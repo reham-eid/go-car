@@ -93,6 +93,8 @@ export const verifyCode = async (req, res) => {
     }
 
     if (verification.forgetCode.toString() === code.toString()) {
+      verification.forgetCode = null;
+      await verification.save();
       res
         .status(200)
         .json({ message: "Verification code verified successfully" });
