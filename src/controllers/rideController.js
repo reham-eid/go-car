@@ -1,13 +1,15 @@
 import Ride from "../models/rideModel.js";
 import Stripe from "stripe";
 
+// console.log("Stripe API Key:", process.env.STRIPE_SECRET_KEY);
+
 const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2022-11-15',
+  apiVersion: "2024-11-24",
 });
 // Create a new ride
 export const createRide = async (req, res) => {
   try {
-    const { carId } = req.params
+    const { carId } = req.params;
     const {
       startDestination,
       endDestination,
@@ -26,7 +28,7 @@ export const createRide = async (req, res) => {
       endDestination,
       rideType,
       brand,
-      user: req.user._id, // token 
+      user: req.user._id, // token
       paymentMethod,
       totalCost,
     });
@@ -61,7 +63,7 @@ export const createRide = async (req, res) => {
     }
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Error creating ride" , error: err});
+    res.status(500).json({ message: "Error creating ride", error: err });
   }
 };
 
