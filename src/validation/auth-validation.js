@@ -1,4 +1,4 @@
-import { body, query } from "express-validator";
+import { body } from "express-validator";
 import { validatorHandlerMiddleware } from "../middelware/validatorHandlerMiddleware.js";
 
 // validation for register method
@@ -49,7 +49,7 @@ export const forgetPassValidation = [
 
 // validation for Reset Password method
 export const resetPassValidation = [
-  query("emailToken").isString().withMessage("Invalid email address"),
+  body("email").isEmail().withMessage("Invalid email address"),
   body("newPassword")
     .isLength({ min: 8 })
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
