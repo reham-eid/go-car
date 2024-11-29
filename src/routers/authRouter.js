@@ -10,6 +10,7 @@ import {
   loginValidation,
   resetPassValidation,
   forgetPassValidation,
+  verifyCodeValidation,
 } from "../validation/auth-validation.js";
 
 import {
@@ -43,9 +44,9 @@ router.post("/sign-up/with", signupWithOAuth);
 router.post("/forget-password", forgetPassValidation, requestPasswordReset);
 
 // verify code router
-router.post("/verify-code", verifyCode);
+router.post("/verify-code", verifyCodeValidation, verifyCode);
 
 //reset new password router
-router.post("/reset-password/", resetPassValidation, resetPassword);
+router.put("/reset-password/", resetPassValidation, resetPassword);
 
 export { router as authRouter };

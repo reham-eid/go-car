@@ -46,7 +46,12 @@ export const forgetPassValidation = [
   body("email").isEmail().withMessage("Invalid email address"),
   validatorHandlerMiddleware,
 ];
-
+// validation for verify Code method
+export const verifyCodeValidation = [
+  body("email").isEmail().withMessage("Invalid email address"),
+  body("code").notEmpty().isNumeric().withMessage("code is required"),
+  validatorHandlerMiddleware,
+];
 // validation for Reset Password method
 export const resetPassValidation = [
   body("email").isEmail().withMessage("Invalid email address"),

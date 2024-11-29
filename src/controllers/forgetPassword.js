@@ -4,6 +4,7 @@ import asyncHandler from "express-async-handler";
 import dotenv from "dotenv";
 import randomstring from "randomstring";
 import User from "../models/userModel.js";
+import VerificationCode from "../models/verifyCodeModel.js";
 
 dotenv.config();
 
@@ -27,12 +28,12 @@ transporter.verify((error, success) => {
     console.log("SMTP Connection Verified:", success);
   }
 });
-// request for password reset
+
 export const requestPasswordReset = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // Check email in DB
+    // Check if the user exists
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json("Invalid email");
 
@@ -40,117 +41,85 @@ export const requestPasswordReset = async (req, res) => {
     if (!user.isEmailConfirm)
       return res.status(400).json("Your account is not activated.");
 
-    // Generate plain forgetCode
+    // Generate forget code
     const forgetCode = randomstring.generate({ charset: "numeric", length: 5 });
 
-    // Log the plain forgetCode for verification
-    console.log("Generated forgetCode (plain):", forgetCode);
-
-    // Hash forgetCode for saving in DB
-    // const hashedForgetCode = bcryptjs.hashSync(forgetCode, +process.env.SALT);
-
-    // Log the hashed forgetCode for verification
-    // console.log("Hashed forgetCode:", hashedForgetCode);
-
-    // Save hashed forgetCode to DB
-    user.forgetCode = forgetCode;
-    await user.save();
+    // Save verification code
+    await VerificationCode.create({ email, code: forgetCode });
 
     // Send email
-    const isSent = await transporter.sendMail({
+    await transporter.sendMail({
       to: email,
-      subject: "Your Verification Code",
-      text: `To reset your password use this Code: ${forgetCode}`,
+      subject: "Password Reset Verification Code",
+      text: `Your verification code is: ${forgetCode}`,
     });
 
-    if (!isSent) {
-      return res
-        .status(500)
-        .json("Failed to send reset password email. Please try again.");
-    }
-
-    res.status(200).json({
-      message: "Check your email for the reset link.",
-      username: user.userName,
-    });
+    res.status(200).json("Verification code sent to your email.");
   } catch (err) {
     console.error("Error in requestPasswordReset:", err);
     res.status(500).json("An error occurred. Please try again.");
   }
 };
 
-// verify code
 export const verifyCode = async (req, res) => {
   const { email, code } = req.body;
 
   try {
-    const verification = await User.findOne({ email });
+    // Find the verification record
+    const verification = await VerificationCode.findOneAndUpdate(
+      { email, code },
+      { forgetCodeVerified: true },
+      { new: true }
+    );
 
     if (!verification) {
-      return res
-        .status(400)
-        .json({ message: "No verification code found for this email" });
+      return res.status(400).json("Invalid or expired verification code.");
     }
 
-    if (verification.forgetCode.toString() === code.toString()) {
-      verification.forgetCode = null;
-      await verification.save();
-      res
-        .status(200)
-        .json({ message: "Verification code verified successfully" });
-    } else {
-      res.status(400).json({ message: "Invalid verification code" });
-    }
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error verifying the code", error: error.message });
-    console.error(error);
+    res.status(200).json("Code verified successfully.");
+  } catch (err) {
+    console.error("Error in verifyCode:", err);
+    res.status(500).json("An error occurred. Please try again.");
   }
 };
 
-export const resetPassword = asyncHandler(async (req, res, next) => {
+export const resetPassword = async (req, res) => {
+  const { email, newPassword, confirmPassword } = req.body;
+
   try {
-    //get data from req
-    const { newPassword, confirmPassword, email } = req.body;
+    // Check if verification exists
+    const verification = await VerificationCode.findOne({
+      email,
+      forgetCodeVerified: true,
+    });
+    if (!verification)
+      return res.status(400).json("No active reset request found.");
 
-    // check user
+    // Find user and reset password
     const user = await User.findOne({ email });
-    // console.log("user>>>>>> ",user);
+    if (!user) return res.status(400).json("Invalid email.");
 
-    if (!user) {
-      return next(
-        new Error("you already reset your password.. try to login now", {
-          cause: 400,
-        })
-      );
-    }
     //compare 2-passwords
     const match = bcryptjs.compareSync(newPassword, user.password);
     // hash & update password
     if (match) {
-      return next(
-        new Error(
-          "new password is the same as old password .. please change it",
-          { cause: 409 }
-        )
-      );
-    }
-    // password to hash
-    const hashedPassword = bcryptjs.hashSync(newPassword, 10);
+      return res.status(409).json(
+        "new password is the same as old password .. please change it",
 
+      )
+    }
+
+    const hashedPassword = bcryptjs.hashSync(newPassword, 10);
     user.password = hashedPassword;
     user.changePassAt = Date.now();
-    user.forgetCode = null;
-    const resetPassword = await user.save();
+    await user.save();
 
-    //send res
-    res.status(200).json({
-      message: "reset your Password successfuly , try to login now",
-      resetPassword,
-    });
+    // Delete verification record after successful reset
+    await VerificationCode.deleteOne({ email });
+
+    res.status(200).json("Password reset successfully. You can now log in.");
   } catch (err) {
-    console.error("Error in reset Password :", err);
+    console.error("Error in resetPassword:", err);
     res.status(500).json("An error occurred. Please try again.");
   }
-});
+};

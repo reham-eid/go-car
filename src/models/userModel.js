@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema({
     default: false,
   },
   changePassAt: Date,
+  codeExpiresAt: Date,
   forgetCode:{
     type: String,
   },
