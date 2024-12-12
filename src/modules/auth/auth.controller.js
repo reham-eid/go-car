@@ -4,7 +4,7 @@ import { htmlCode, htmlMail } from "../../services/emails/htmlTemplete.js";
 import { sendEmail } from "../../services/emails/sendEmail.js";
 import bcryptjs from "bcryptjs";
 import randomstring from "randomstring";
-import { systemRoles } from "../../utils/system.roles.js";
+import { status, systemRoles } from "../../utils/system.roles.js";
 import {
   generateToken,
   verifyToken,
@@ -26,7 +26,7 @@ const signUp = asyncHandler(async (req, res, next) => {
   });
 
   // create confirmatiom link
-//http://localhost:4001/api/v1
+  //http://localhost:4001/api/v1
   const link = `${req.protocol}://${req.headers.host}/api/v1/auth/acctivate_account/${emailToken}`;
 
   // send confirmation link
@@ -43,6 +43,7 @@ const signUp = asyncHandler(async (req, res, next) => {
   req.savedDocument = { model: User, condition: user._id };
   // send res
   res.status(201).json({
+    success: true,
     message: "sign up successfuly, Now check your email",
     user: user.username,
   });
@@ -96,7 +97,9 @@ const logIn = asyncHandler(async (req, res, next) => {
   user.token = token;
   await user.save();
   //send res
-  res.status(200).json({ message: "logIn successfuly", AccsessToken: token });
+  res
+    .status(200)
+    .json({ success: true, message: "logIn successfuly", accsessToken: token });
 });
 
 // const signupWithGoogle = asyncHandler(async (req, res, next) => {
@@ -141,41 +144,42 @@ const logIn = asyncHandler(async (req, res, next) => {
 //   });
 // });
 
-// const logInWithGoogle = asyncHandler(async (req, res, next) => {
-//   const { idToken } = req.body;
-//   const client = new OAuth2Client();
-//   async function verify() {
-//     const ticket = await client.verifyIdToken({
-//       idToken,
-//       audience: process.env.CLIENT_ID,
-//     });
-//     const payload = ticket.getPayload();
-//     return payload;
-//   }
-//   const result = await verify().catch(console.error);
-//   if (result.email_verified !== true) {
-//     return next(
-//       new Error("email is not verified , please enter another google email", {
-//         cause: 400,
-//       })
-//     );
-//   }
+const logInWithGoogle = asyncHandler(async (req, res, next) => {
+  const { idToken } = req.body;
+  const client = new OAuth2Client();
+  async function verify() {
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: process.env.CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    return payload;
+  }
+  const result = await verify().catch(console.error);
+  if (result.email_verified !== true) {
+    return next(
+      new Error("email is not verified , please enter another google email", {
+        cause: 400,
+      })
+    );
+  }
 
-//   //check data by email
-//   const user = await User.findOne({ email: result.email, provider: "GOOGLE" });
-//   if (!user) return next(new Error("User Not found", { cause: 404 }));
-//   //generate token
-//   const token = generateToken({
-//     payload: { userId: user._id, email: result.email },
-//     expiresIn: 40,
-//   });
-//   //update the status to online
-//   user.status = systemRoles.online;
-//   user.token = token;
-//   await user.save();
+  //check data by email
+  const user = await User.findOne({ email: result.email, provider: "GOOGLE" });
+  if (!user) return next(new Error("User Not found", { cause: 404 }));
+  //generate token
+  const token = generateToken({
+    payload: { userId: user._id, email: result.email },
+    expiresIn: 40,
+  });
+  //update the status to online
+  user.status = status.online;
+  user.token = token;
+  await user.save();
 
-//   res.status(200).json({ message: "login successfully with google", result });
-// });
+  res.status(200).json({ message: "login successfully with google", result });
+});
+
 const forgetPass = asyncHandler(async (req, res, next) => {
   // get email from req
   const { email } = req.body;
