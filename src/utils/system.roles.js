@@ -12,22 +12,3 @@ export const status = {
   softDelete: "soft Deleted",
 };
 Object.freeze(status);
-
-export const orderStatus = {
-  placed: "Placed",
-  pending:"Pending",
-  canclled: "Canclled",
-  delivered:"Delivered",
-  refunded: "Refunded", 
-  paied:"Visa Paied",
-  failedToPaied:"Failed to Paied",
-};
-Object.freeze(orderStatus);
-
-export const payStatus = {
-  cash:"Cash",
-  stripe: "Stripe",
-  paymob:"Paymob"
-};
-Object.freeze(payStatus);
-
