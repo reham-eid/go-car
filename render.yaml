@@ -1,0 +1,9 @@
+name: go-car-project
+type: node
+runtime: nodejs
+start: npm start
+install: npm install
+env:
+  NODE_ENV: "production"
+  PORT: "3001"
+  MONGO_URI: "mongodb+srv://rehameid2001:ZxgdeFL4ne1olZ6j@cluster0.octaf.mongodb.net/go-car-db?retryWrites=true&w=majority&ssl=true&tlsAllowInvalidCertificates=true"
