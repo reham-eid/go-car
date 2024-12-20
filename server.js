@@ -4,6 +4,7 @@ import appUse from "./src/appHelper.js";
 import { Server } from "socket.io";
 import fs from "fs";
 import https from "https";
+import jwt from "jsonwebtoken";
 
 dotenv.config();
 
@@ -29,7 +30,7 @@ async function bootStrap() {
     //   console.log(`🚀 Server listening on port ${process.env.PORT}`);
     // });
 
-    let serverListen
+    let serverListen;
 
     // Check if SSL certificates exist in production
     const hasSSLCert =
@@ -49,7 +50,6 @@ async function bootStrap() {
 
     console.log(`🚀 Server running on port ${process.env.PORT}`);
 
-    // Integrating Socket.IO
     const io = new Server(serverListen, {
       cors: {
         origin: "*",
@@ -60,47 +60,52 @@ async function bootStrap() {
       reconnectionAttempts: 5,
     });
 
-    // /* Integrate Socket.IO */
-    // const io = new Server(serverListen, {
-    //   cors: {
-    //     origin: "*",
-    //     methods: ["GET", "POST"],
-    //   },
-    //   path: "/socket.io",
-    // });
+    // Middleware to authenticate token
+    io.use((socket, next) => {
+      const authHeader = socket.handshake.headers.authentication;
+      const token = authHeader?.split(" ")[1];
+      if (!token) {
+        return next(new Error("Authentication error: No token provided"));
+      }
+
+      jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
+        if (err) {
+          return next(new Error("Authentication error: Invalid token"));
+        }
+        socket.user = decoded; // Attach user data to the socket object
+        console.log(socket.user, ">> socket.user ");
+
+        next();
+      });
+    });
 
     // Socket.IO Logic
     io.on("connection", (socket) => {
-      console.log(`Client connected: ${socket.id}`);
+      console.log(`Client connected: ${socket.id}, User: ${socket.user.id}`);
 
       // Join a support room (user or session-specific)
-      socket.on(
-        "joinSupportRoom",
-        ({ userId, userName, recipientId, recipientName }) => {
-          const roomId = `${userId}-${recipientId}`;
-          const roomName = `${userName}-${recipientName}`;
-          socket.join(roomId);
-          console.log(
-            `Socket ${socket.id} joined room: ${roomId} (${roomName})`
-          );
-        }
-      );
+      socket.on("joinSupportRoom", ({ recipientId, recipientName }) => {
+        const roomId = `${socket.user.id}-${recipientId}`;
+        const roomName = `${socket.user.name}-${recipientName}`;
+        socket.join(roomId);
+        console.log(`Socket ${socket.id} joined room: ${roomId} (${roomName})`);
+      });
 
       // Handle message sending to support
       socket.on("sendMessageToSupport", (data) => {
-        const { roomId, message, senderId, senderName } = data;
+        const { roomId, message } = data;
         console.log(
-          `1-Message from ${senderName} (${senderId}) in room ${roomId}: ${message}`
+          `1-Message from ${socket.user.name} (${socket.user.id}) in room ${roomId}: ${message}`
         );
 
         io.to(roomId).emit("newSupportMessage", {
-          senderId,
-          senderName,
+          senderId: socket.user.id,
+          senderName: socket.user.name,
           message,
           timestamp: new Date().toISOString(),
         });
         console.log(
-          `2-Message from ${senderName} (${senderId}) in room ${roomId}: ${message}`
+          `2-Message from ${socket.user.name} (${socket.user.id}) in room ${roomId}: ${message}`
         );
       });
 

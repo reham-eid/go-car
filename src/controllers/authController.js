@@ -64,9 +64,13 @@ export const login = async (req, res) => {
 
     const expiresIn = rememberMe ? "30d" : "1h";
 
-    const token = jwt.sign({ userId: user._id , role: user.role }, process.env.JWT_SECRET_KEY, {
-      expiresIn,
-    });
+    const token = jwt.sign(
+      { id: user._id, name: user.userName, role: user.role },
+      process.env.JWT_SECRET_KEY,
+      {
+        expiresIn,
+      }
+    );
 
     user.isEmailConfirm = true;
     await user.save();
